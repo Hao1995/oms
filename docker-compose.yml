@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_container
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - "./database/initdb/:/docker-entrypoint-initdb.d"
+    command:
+      [
+        "--default-authentication-plugin=mysql_native_password",
+      ]
+    healthcheck:
+      test: "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD || exit 1"
+      interval: 1s
+      timeout: 10s
+      retries: 5
+    restart: always
+
+  # api_server:
+  #   build: .
+  #   container_name: api_server
+  #   depends_on:
+  #     - db
+  #   environment:
+  #     RAILS_ENV: development
+  #     DATABASE_HOST: db
+  #     DATABASE_USER: root
+  #     DATABASE_PASSWORD: password
+  #   volumes:
+  #     - .:/app
+  #   ports:
+  #     - "3000:3000"
+  #   command: "bundle exec rails s -b 0.0.0.0"
+
+volumes:
+  mysql_data:
