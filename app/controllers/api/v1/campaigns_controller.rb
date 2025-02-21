@@ -22,11 +22,22 @@ module Api
 
       # POST /campaigns
       def create
-        @campaign = Campaign.new(campaign_params)
-        if @campaign.save
+        ActiveRecord::Base.transaction do
+          @campaign = Campaign.new(campaign_params)
+          unless @campaign.save
+            render json: @campaign.errors, status: :internal_server_error
+            raise ActiveRecord::Rollback
+          end
+
+          agent_sync = AgentSyncOutbox.new(
+            event_type: AgentSyncOutbox.event_types[:create_campaign],
+            payload: @campaign.to_json,
+          )
+          unless agent_sync.save
+            render json: agent_sync.errors, status: :internal_server_error
+            raise ActiveRecord::Rollback
+          end
           render json: @campaign, status: :created
-        else
-          render json: @campaign.errors, status: :internal_server_error
         end
       end
 

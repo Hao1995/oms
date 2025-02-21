@@ -10,7 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_02_20_095318) do
+ActiveRecord::Schema[8.0].define(version: 2025_02_21_051307) do
+  create_table "agent_sync_outboxes", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+    t.string "event_type"
+    t.json "payload"
+    t.boolean "status", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "campaigns", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "customer_id", null: false, comment: "for different customers"
     t.string "title", limit: 40, null: false
