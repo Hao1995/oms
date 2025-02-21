@@ -1,4 +1,5 @@
 require 'bunny'
+require Rails.root.join('app/services/agent/queue_setup')
 
 class RabbitMQConnection
   def self.create_connection
@@ -11,3 +12,5 @@ class RabbitMQConnection
     @channel ||= create_connection.create_channel
   end
 end
+
+Agent::QueueSetup.setup
