@@ -1,14 +1,18 @@
 module Api
   module V1
     class CampaignsController < ApplicationController
+      include Paginatable
+
       before_action :set_campaign, only: [:show, :update, :destroy]
 
       CUSTOMER_ID = 123
 
       # GET /campaigns
       def index
-        @campaigns = Campaign.all
-        render json: @campaigns
+        per_page = params.fetch(:per_page, 10).to_i
+        page = params.fetch(:page, 1).to_i
+        @campaigns = Campaign.page(page).per(per_page)
+        render json: paginate(@campaigns)
       end
 
       # GET /campaigns/:id
