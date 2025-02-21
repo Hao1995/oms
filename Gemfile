@@ -46,8 +46,6 @@ gem "rubocop", require: false
 
 gem 'kaminari'
 
-gem 'rufus-scheduler'
-
 gem 'bunny'
 
 group :development, :test do

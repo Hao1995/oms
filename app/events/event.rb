@@ -1,6 +1,11 @@
 require 'json'
 
 class Event
+  TYPE = {
+    :create_campaign => "create_campaign",
+    :update_campaign => "update_campaign",
+  }
+
   attr_accessor :type, :data, :timestamp
 
   def initialize(type, data, timestamp = Time.now.to_i)
