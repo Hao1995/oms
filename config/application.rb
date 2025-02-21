@@ -25,5 +25,7 @@ module Oms
     # config.eager_load_paths << Rails.root.join("extras")
 
     config.api_only = true # This removes CSRF protection by default
+
+    config.logger = Logger.new(STDOUT)
   end
 end
