@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_02_20_095318) do
+ActiveRecord::Schema[8.0].define(version: 2025_02_22_114822) do
   create_table "agent_sync_outboxes", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.string "event_type"
     t.json "payload"
@@ -22,7 +22,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_20_095318) do
   create_table "campaigns", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "customer_id", null: false, comment: "for different customers"
     t.string "title", limit: 40, null: false
-    t.column "currency", "enum('USD','TWD')", null: false
+    t.column "currency", "enum('USD')", null: false
     t.decimal "budget", precision: 65, scale: 2, null: false
     t.string "advertiser_id", null: false
     t.datetime "created_at", null: false

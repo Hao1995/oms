@@ -1,3 +1,6 @@
 agents:
   megaphone:
     name: megaphone
+    rate_limit:
+      total: 60
+      interval_sec: 60
