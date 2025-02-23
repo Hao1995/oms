@@ -1,0 +1,3 @@
+campaign_sync:
+  cron: "*/10 * * * * *"  # Runs every 10 seconds
+  class: "CampaignSyncWorker"

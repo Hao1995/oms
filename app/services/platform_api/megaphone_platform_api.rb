@@ -22,6 +22,22 @@ module PlatformApi
       convert_to_campaign_response_dto(response)
     end
 
+    def list_campaigns(page: 1, per_page: 100)
+      uri = URI("#{MEGAPHONE_BASE_URL}/organizations/#{ENV['MEGAPHONE_ORGANIZATION_ID']}/campaigns?page=#{page}&per_page=#{per_page}")
+      request = Net::HTTP::Get.new(uri, @headers)
+
+      response = send_request(uri, request)
+      campaigns = JSON.parse(response.body)
+
+      pagination_info = {
+        total: response['x-total'].to_i,
+        per_page: response['x-per-page'].to_i,
+        current_page: response['x-page'].to_i
+      }
+
+      { campaigns: campaigns, pagination: pagination_info }
+    end
+
     def create_campaign(data)
       uri = URI("#{MEGAPHONE_BASE_URL}/organizations/#{ENV['MEGAPHONE_ORGANIZATION_ID']}/campaigns")
       request = Net::HTTP::Post.new(uri, @headers)
@@ -63,9 +79,9 @@ module PlatformApi
 
     def send_request(uri, request)
       Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == 'https') do |http|
-        Rails.logger.info "[MegaphoneAgent] Request. uri: #{uri}, request: #{request.body}"
+        Rails.logger.debug "[MegaphoneAgent] Request. uri: #{uri}, request: #{request.body}"
         response = http.request(request)
-        Rails.logger.info "[MegaphoneAgent] Response: #{response.code} - #{response.body}"
+        Rails.logger.debug "[MegaphoneAgent] Response: #{response.code} - #{response.body}"
         response
       end
     end

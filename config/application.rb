@@ -25,5 +25,7 @@ module Oms
     # config.eager_load_paths << Rails.root.join("extras")
 
     config.api_only = true # This removes CSRF protection by default
+
+    config.platforms = YAML.load_file(Rails.root.join('config', 'platforms.yml'))['platforms']
   end
 end

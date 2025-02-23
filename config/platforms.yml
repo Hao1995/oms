@@ -1,4 +1,4 @@
-agents:
+platforms:
   megaphone:
     name: megaphone
     rate_limit:
