@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_02_22_135518) do
+ActiveRecord::Schema[8.0].define(version: 2025_02_23_042236) do
   create_table "agent_campaigns", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "campaign_id", null: false
     t.column "agent", "enum('megaphone')", null: false
@@ -22,7 +22,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_22_135518) do
 
   create_table "campaigns", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "customer_id", null: false, comment: "for different customers"
-    t.string "title", limit: 40, null: false
+    t.string "title", null: false
     t.column "currency", "enum('USD')", null: false
     t.decimal "budget", precision: 65, scale: 2, null: false
     t.string "advertiser_id", null: false

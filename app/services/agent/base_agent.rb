@@ -1,5 +1,5 @@
 module Agent
-  class Base
+  class BaseAgent
     def create_campaign(data)
       raise NotImplementedError, "#{self.class} must implement 'create_campaign(data)'"
     end
