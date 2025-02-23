@@ -13,6 +13,9 @@ class CampaignsController < ApplicationController
   end
 
   def show
+    if @campaign.nil?
+      redirect_to campaigns_url, alert: 'Campaign not found.'
+    end
   end
 
   def new

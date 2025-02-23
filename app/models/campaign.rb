@@ -1,4 +1,6 @@
 class Campaign < ApplicationRecord
+  belongs_to :platform
+  
   validates :customer_id, presence: true
   validates :platform_id, presence: true
   validates :platform_campaign_id, presence: true

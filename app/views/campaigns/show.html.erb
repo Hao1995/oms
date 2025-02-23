@@ -1,2 +1,17 @@
-<h1>Api::V1::Campaigns#show</h1>
-<p>Find me in app/views/api/v1/campaigns/show.html.erb</p>
+<div class="max-w-lg mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
+  <h2 class="text-2xl font-bold mb-4">Campaign Details</h2>
+
+  <div class="space-y-2">
+    <p><span class="font-semibold">Title:</span> <%= @campaign.title %></p>
+    <p><span class="font-semibold">Advertiser ID:</span> <%= @campaign.advertiser_id %></p>
+    <p><span class="font-semibold">Budget:</span> <%= number_to_currency(@campaign.budget_cents / 100.0, unit: @campaign.currency) %></p>
+    <p><span class="font-semibold">Platform:</span> <%= @campaign.platform.name %></p>
+    <p><span class="font-semibold">Platform Campaign ID:</span> <%= @campaign.platform_campaign_id %></p>
+    <p><span class="font-semibold">Customer ID:</span> <%= @campaign.customer_id %></p>
+    <p><span class="font-semibold">Created At:</span> <%= @campaign.created_at.strftime('%B %d, %Y %I:%M %p') %></p>
+  </div>
+
+  <div class="mt-4">
+    <%= link_to "Edit", edit_platform_campaign_path(@platform, @campaign), class: "inline-block bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-200" %>
+  </div>
+</div>
