@@ -10,16 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_02_23_064506) do
-  create_table "agent_campaigns", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "campaign_id", null: false
-    t.column "agent", "enum('megaphone')", null: false
-    t.string "agent_campaign_id", null: false
-    t.datetime "created_at", comment: "from agent data"
-    t.datetime "updated_at", comment: "from agent data"
-    t.index ["campaign_id", "agent", "agent_campaign_id"], name: "uq_idx_campaign_agent", unique: true
-  end
-
+ActiveRecord::Schema[8.0].define(version: 2025_02_23_073921) do
   create_table "agents_tables", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
