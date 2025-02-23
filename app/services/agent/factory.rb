@@ -3,7 +3,7 @@ module Agent
     def self.get_agent(agent_name)
       case agent_name
       when 'megaphone'
-        Agent::Megaphone.new(agent_name)
+        Agent::MegaphoneAgent.new(agent_name)
       else
         raise "Unknown agent: #{agent_name}"
       end
