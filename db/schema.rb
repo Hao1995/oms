@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_02_23_052001) do
+ActiveRecord::Schema[8.0].define(version: 2025_02_23_064506) do
   create_table "agent_campaigns", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "campaign_id", null: false
     t.column "agent", "enum('megaphone')", null: false
@@ -20,14 +20,27 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_23_052001) do
     t.index ["campaign_id", "agent", "agent_campaign_id"], name: "uq_idx_campaign_agent", unique: true
   end
 
+  create_table "agents_tables", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "campaigns", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "customer_id", null: false, comment: "for different customers"
-    t.column "agent", "enum('megaphone')", null: false
-    t.string "agent_campaign_id"
+    t.integer "platform_id"
+    t.string "platform_campaign_id"
     t.string "title", null: false
     t.column "currency", "enum('USD')", null: false
     t.decimal "budget_cents", precision: 65, scale: 2, null: false
     t.string "advertiser_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["customer_id", "platform_id", "platform_campaign_id"], name: "idx_on_customer_id_platform_id_platform_campaign_id_0009bccddc", unique: true
+  end
+
+  create_table "platforms", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+    t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

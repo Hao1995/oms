@@ -2,12 +2,12 @@ require 'net/http'
 require 'uri'
 require 'json'
 
-module Agent
-  class MegaphoneAgent < BaseAgent
+module PlatformApi
+  class MegaphonePlatformApi < BasePlatformApi
     MEGAPHONE_BASE_URL = 'https://cms.megaphone.fm/api'
 
-    def initialize(agent_name)
-      @agent_name = agent_name
+    def initialize(platform_name)
+      @platform_name = platform_name
       @headers = {
         'Content-Type' => 'application/json',
         'Authorization' => "Bearer #{ENV['MEGAPHONE_TOKEN']}"

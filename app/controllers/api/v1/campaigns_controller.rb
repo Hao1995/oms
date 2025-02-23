@@ -5,12 +5,8 @@ module Api
 
       before_action :set_campaign, only: [:show, :update, :destroy]
 
-      CUSTOMER_ID = 123  # the real customer_id should extract from login token, this just for simplify.
-      AGENT = "megaphone" # Set default data for simplicity
-
-      def initialize
-        @agent = Agent::Factory.get_agent(AGENT)
-      end
+      CUSTOMER_ID = 123  # the real customer_id should extract from login token, use const for simplify.
+      PLATFORM_ID = 1  # the real platform_id should extract from login token, use const for simplify.
 
       # GET /campaigns
       def index
@@ -27,10 +23,13 @@ module Api
 
       # POST /campaigns
       def create
-        agent_campaign_dto = @agent.create_campaign(campaign_params)
+        platform = Platform.find(PLATFORM_ID)
+        platform_api = PlatformApi::Factory.get_platform(platform.name)
+
+        platform_campaign_dto = platform_api.create_campaign(campaign_params)
         @campaign = Campaign.new(campaign_params.merge({
-          :agent => AGENT,
-          :agent_campaign_id => agent_campaign_dto.id
+          :platform_id => platform.id,
+          :platform_campaign_id => platform_campaign_dto.id
         }))
         if @campaign.save
           render json: @campaign, status: :created
@@ -41,21 +40,23 @@ module Api
 
       # PUT /campaigns/:id
       def update
-        agent_campaign_dto = @agent.get_campaign(@campaign.agent_campaign_id)
-        same = are_campaigns_same?(@campaign, agent_campaign_dto)
+        platform = Platform.find(PLATFORM_ID)
+        platform_api = PlatformApi::Factory.get_platform(platform.name)
 
-        if same || (!same && agent_campaign_dto.updated_at < @campaign.updated_at)
-          Rails.logger.info "PUT /campaigns/:id. Update. Agent data is old, update to agent"
-          agent.update_campaign(agentCampaign.agent_campaign_id, data)
+        platform_campaign_dto = platform_api.get_campaign(@campaign.platform_campaign_id)
+        same = are_campaigns_same?(@campaign, platform_campaign_dto)
+
+        if same || (!same && platform_campaign_dto.updated_at < @campaign.updated_at)
+          Rails.logger.info "PUT /campaigns/:id. Update. platform data is old, update to platform"
+          platform_api.update_campaign(@campaign.platform_campaign_id, campaign_params)
           @campaign.update!(campaign_params)
         else
-          Rails.logger.info "PUT /campaigns/:id. Update. Agent data is new, sync from agent's campaign data"
-
-          origin_campaign.title  = agent_campaign_dto.title
-          origin_campaign.advertiser_id  = agent_campaign_dto.advertiser_id
-          origin_campaign.budget_cents  = agent_campaign_dto.budget_cents
-          origin_campaign.currency = agent_campaign_dto.currency
-          origin_campaign.save!
+          Rails.logger.info "PUT /campaigns/:id. Update. platform data is new, sync from platform's campaign data"
+          @campaign.title  = platform_campaign_dto.title
+          @campaign.advertiser_id  = platform_campaign_dto.advertiser_id
+          @campaign.budget_cents  = platform_campaign_dto.budget_cents.to_s
+          @campaign.currency = platform_campaign_dto.currency
+          @campaign.save!
         end
 
         render json: @campaign
@@ -65,7 +66,10 @@ module Api
 
       # DELETE /campaigns/:id
       def destroy
-        @agent.delete_campaign(@campaign.agent_campaign_id)
+        platform = Platform.find(PLATFORM_ID)
+        platform_api = PlatformApi::Factory.get_platform(platform.name)
+
+        platform_api.delete_campaign(@campaign.platform_campaign_id)
         @campaign.destroy
         head :no_content
       end
@@ -78,15 +82,23 @@ module Api
       end
 
       def campaign_params
-        params.permit(:title, :currency, :budget_cents, :advertiser_id)
+        params.permit(:platform_id, :platform_campaign_id, :title, :currency, :budget_cents, :advertiser_id)
               .merge(:customer_id => CUSTOMER_ID)
       end
 
-      def are_campaigns_same?(origin_campaign, agent_campaign_dto)
-        agent_campaign_dto.title == origin_campaign.title &&
-        agent_campaign_dto.advertiser_id == origin_campaign.advertiser_id &&
-        agent_campaign_dto.budget_cents == origin_campaign.budget &&
-        agent_campaign_dto.currency == origin_campaign.currency
+      def platform
+        @platform ||= Platform.find(PLATFORM_ID)
+      end
+
+      def platform_api
+        @platform_api ||= PlatformApi::Factory.get_platform(platform.name)
+      end
+
+      def are_campaigns_same?(origin_campaign, platform_campaign_dto)
+        platform_campaign_dto.title == origin_campaign.title &&
+        platform_campaign_dto.advertiser_id == origin_campaign.advertiser_id &&
+        platform_campaign_dto.budget_cents == origin_campaign.budget_cents &&
+        platform_campaign_dto.currency == origin_campaign.currency
       end
     end
   end

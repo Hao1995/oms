@@ -46,8 +46,6 @@ gem "rubocop", require: false
 
 gem 'kaminari'
 
-gem 'bunny'
-
 gem 'dotenv-rails', groups: [:development, :test]
 
 group :development, :test do

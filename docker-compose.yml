@@ -21,23 +21,6 @@ services:
       retries: 5
     restart: always
 
-  rabbitmq:
-    image: rabbitmq:3-management
-    volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-    healthcheck:
-      test: ["CMD-SHELL", "rabbitmq-diagnostics -q status || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    restart: always
-
   # api_server:
   #   build: .
   #   container_name: api_server
@@ -56,4 +39,3 @@ services:
 
 volumes:
   mysql_data:
-  rabbitmq-data:
