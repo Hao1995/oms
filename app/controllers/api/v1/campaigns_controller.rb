@@ -3,10 +3,10 @@ module Api
     class CampaignsController < ApplicationController
       include Paginatable
 
+      before_action :set_platform, :set_platform_api
       before_action :set_campaign, only: [:show, :update, :destroy]
 
       CUSTOMER_ID = 123  # the real customer_id should extract from login token, use const for simplify.
-      PLATFORM_ID = 1  # the real platform_id should extract from login token, use const for simplify.
 
       # GET /campaigns
       def index
@@ -23,12 +23,9 @@ module Api
 
       # POST /campaigns
       def create
-        platform = Platform.find(PLATFORM_ID)
-        platform_api = PlatformApi::Factory.get_platform(platform.name)
-
-        platform_campaign_dto = platform_api.create_campaign(campaign_params)
+        platform_campaign_dto = @platform_api.create_campaign(campaign_params)
         @campaign = Campaign.new(campaign_params.merge({
-          :platform_id => platform.id,
+          :platform_id => @platform.id,
           :platform_campaign_id => platform_campaign_dto.id
         }))
         if @campaign.save
@@ -40,15 +37,12 @@ module Api
 
       # PUT /campaigns/:id
       def update
-        platform = Platform.find(PLATFORM_ID)
-        platform_api = PlatformApi::Factory.get_platform(platform.name)
-
-        platform_campaign_dto = platform_api.get_campaign(@campaign.platform_campaign_id)
+        platform_campaign_dto = @platform_api.get_campaign(@campaign.platform_campaign_id)
         same = are_campaigns_same?(@campaign, platform_campaign_dto)
 
         if same || (!same && platform_campaign_dto.updated_at < @campaign.updated_at)
           Rails.logger.info "PUT /campaigns/:id. Update. platform data is old, update to platform"
-          platform_api.update_campaign(@campaign.platform_campaign_id, campaign_params)
+          @platform_api.update_campaign(@campaign.platform_campaign_id, campaign_params)
           @campaign.update!(campaign_params)
         else
           Rails.logger.info "PUT /campaigns/:id. Update. platform data is new, sync from platform's campaign data"
@@ -66,15 +60,20 @@ module Api
 
       # DELETE /campaigns/:id
       def destroy
-        platform = Platform.find(PLATFORM_ID)
-        platform_api = PlatformApi::Factory.get_platform(platform.name)
-
-        platform_api.delete_campaign(@campaign.platform_campaign_id)
+        @platform_api.delete_campaign(@campaign.platform_campaign_id)
         @campaign.destroy
         head :no_content
       end
 
       private
+
+      def set_platform
+        @platform = Platform.find(params[:platform_id])
+      end
+
+      def set_platform_api
+        @platform_api = PlatformApi::Factory.get_platform(@platform.name)
+      end
 
       def set_campaign
         @campaign = Campaign.find_by(id: params[:id])
@@ -84,14 +83,6 @@ module Api
       def campaign_params
         params.permit(:platform_id, :platform_campaign_id, :title, :currency, :budget_cents, :advertiser_id)
               .merge(:customer_id => CUSTOMER_ID)
-      end
-
-      def platform
-        @platform ||= Platform.find(PLATFORM_ID)
-      end
-
-      def platform_api
-        @platform_api ||= PlatformApi::Factory.get_platform(platform.name)
       end
 
       def are_campaigns_same?(origin_campaign, platform_campaign_dto)
