@@ -33,7 +33,7 @@ class CampaignsController < ApplicationController
     }))
 
     if @campaign.save
-      redirect_to @campaign, notice: 'Campaign was successfully created.'
+      redirect_to platform_campaign_path(@platform, @campaign), notice: 'Campaign was successfully created.'
     else
       render :new, status: :unprocessable_entity
     end
