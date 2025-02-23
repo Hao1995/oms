@@ -1,10 +1,27 @@
-<style>
-.pagination{padding:.3em;margin:.3em; font: 13.34px helvetica,arial,freesans,clean,sans-serif;}
-.pagination a{padding:.1em .3em;margin:.2em;border:1px solid #aad;text-decoration:none;color:#369;}
-.pagination a:hover,.pagination a:active{border:1px solid #369;color:#000;}
-.pagination span.current{padding:.1em .3em;margin:.2em;border:1px solid #369;font-weight:bold;background-color:#369;color:#FFF;}
-.pagination span.disabled{padding:.1em .3em;margin:.2em;border:1px solid #eee;color:#ddd;}
-</style>
-<%= paginator.render do -%>
-<div class="pagination"><%= prev_page_tag -%><%= next_page_tag -%></div>
-<% end -%>
+<div class="flex space-x-2 mt-4">
+  <%# First Page Link %>
+  <% if current_page.first? %>
+    <span class="bg-gray-300 text-white py-2 px-4 rounded-lg opacity-50 cursor-not-allowed">« First</span>
+  <% else %>
+    <%= link_to '« First', url_for(page: 1), class: 'bg-sky-500 text-white py-2 px-4 rounded-lg hover:bg-sky-600' %>
+  <% end %>
+
+  <%# Page Numbers %>
+  <% paginator.each_page do |page| %>
+    <% if page %>
+      <% if page == current_page %>
+        <span class="bg-sky-700 text-white py-2 px-4 rounded-lg font-bold"><%= page %></span>
+      <% else %>
+        <%= link_to page, url_for(page: page), class: 'bg-sky-500 text-white py-2 px-4 rounded-lg hover:bg-sky-600' %>
+      <% end %>
+    <% else %>
+      <span class="py-2 px-4">...</span>
+    <% end %>
+  <% end %>
+
+  <% if current_page.last? %>
+    <span class="bg-gray-300 text-white py-2 px-4 rounded-lg opacity-50 cursor-not-allowed">Last »</span>
+  <% else %>
+    <%= link_to 'Last »', url_for(page: @campaigns.total_pages), class: 'bg-sky-500 text-white py-2 px-4 rounded-lg hover:bg-sky-600' %>
+  <% end %>
+</div>
