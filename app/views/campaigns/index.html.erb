@@ -1,0 +1,39 @@
+<!-- app/views/campaigns/index.html.erb -->
+<div class="container mx-auto py-8">
+  <h1 class="text-2xl font-bold mb-4">Campaigns List</h1>
+
+  <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="py-2 px-4 text-left">Title</th>
+        <th class="py-2 px-4 text-left">Advertiser ID</th>
+        <th class="py-2 px-4 text-left">Budget</th>
+        <th class="py-2 px-4 text-left">Currency</th>
+        <th class="py-2 px-4 text-left">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @campaigns.each do |campaign| %>
+        <tr class="border-b hover:bg-gray-50">
+          <td class="py-2 px-4"><%= campaign.title %></td>
+          <td class="py-2 px-4"><%= campaign.advertiser_id %></td>
+          <td class="py-2 px-4"><%= number_to_currency(campaign.budget_cents / 100.0, unit: campaign.currency) %></td>
+          <td class="py-2 px-4"><%= campaign.currency %></td>
+          <td class="py-2 px-4 space-x-2">
+            <%= link_to 'Show', platform_campaign_path(@platform, campaign), class: "text-blue-600 hover:text-blue-800" %>
+            <%= link_to 'Edit', edit_platform_campaign_path(@platform, campaign), class: "text-green-600 hover:text-green-800" %>
+            <%= link_to 'Delete', platform_campaign_path(@platform, campaign), method: :delete, data: { confirm: 'Are you sure?' }, class: "text-red-600 hover:text-red-800" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <div class="mt-4">
+    <%= link_to 'New Campaign', new_platform_campaign_path(@platform), class: "inline-block bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600" %>
+  </div>
+
+  <div class="mt-4">
+    <%= paginate @campaigns %>
+  </div>
+</div>
