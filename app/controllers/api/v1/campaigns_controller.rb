@@ -5,7 +5,12 @@ module Api
 
       before_action :set_campaign, only: [:show, :update, :destroy]
 
-      CUSTOMER_ID = 123
+      CUSTOMER_ID = 123  # the real customer_id should extract from login token, this just for simplify.
+      AGENT = "megaphone" # Set default data for simplicity
+
+      def initialize
+        @agent = Agent::Factory.get_agent(AGENT)
+      end
 
       # GET /campaigns
       def index
@@ -22,7 +27,11 @@ module Api
 
       # POST /campaigns
       def create
-        @campaign = Campaign.new(campaign_params)
+        agent_campaign_dto = @agent.create_campaign(campaign_params)
+        @campaign = Campaign.new(campaign_params.merge({
+          :agent => AGENT,
+          :agent_campaign_id => agent_campaign_dto.id
+        }))
         if @campaign.save
           render json: @campaign, status: :created
         else
@@ -32,15 +41,31 @@ module Api
 
       # PUT /campaigns/:id
       def update
-        if @campaign.update(campaign_params)
-          render json: @campaign
+        agent_campaign_dto = @agent.get_campaign(@campaign.agent_campaign_id)
+        same = are_campaigns_same?(@campaign, agent_campaign_dto)
+
+        if same || (!same && agent_campaign_dto.updated_at < @campaign.updated_at)
+          Rails.logger.info "PUT /campaigns/:id. Update. Agent data is old, update to agent"
+          agent.update_campaign(agentCampaign.agent_campaign_id, data)
+          @campaign.update!(campaign_params)
         else
-          render json: @campaign.errors, status: :internal_server_error
+          Rails.logger.info "PUT /campaigns/:id. Update. Agent data is new, sync from agent's campaign data"
+
+          origin_campaign.title  = agent_campaign_dto.title
+          origin_campaign.advertiser_id  = agent_campaign_dto.advertiser_id
+          origin_campaign.budget_cents  = agent_campaign_dto.budget_cents
+          origin_campaign.currency = agent_campaign_dto.currency
+          origin_campaign.save!
         end
+
+        render json: @campaign
+      rescue
+        render json: @campaign.errors, status: :internal_server_error
       end
 
       # DELETE /campaigns/:id
       def destroy
+        @agent.delete_campaign(@campaign.agent_campaign_id)
         @campaign.destroy
         head :no_content
       end
@@ -53,8 +78,15 @@ module Api
       end
 
       def campaign_params
-        params.permit(:title, :currency, :budget, :advertiser_id)
-              .merge(:customer_id => CUSTOMER_ID) # the real customer_id should extract from login token, this just for simplify.
+        params.permit(:title, :currency, :budget_cents, :advertiser_id)
+              .merge(:customer_id => CUSTOMER_ID)
+      end
+
+      def are_campaigns_same?(origin_campaign, agent_campaign_dto)
+        agent_campaign_dto.title == origin_campaign.title &&
+        agent_campaign_dto.advertiser_id == origin_campaign.advertiser_id &&
+        agent_campaign_dto.budget_cents == origin_campaign.budget &&
+        agent_campaign_dto.currency == origin_campaign.currency
       end
     end
   end

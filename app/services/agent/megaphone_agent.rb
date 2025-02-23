@@ -28,7 +28,7 @@ module Agent
       request.body = {
         title: data["title"],
         advertiserId: data["advertiser_id"],
-        totalBudgetCents: (data["budget"].to_f * 100).to_i, # Convert to cents
+        totalBudgetCents: data["budget_cents"].to_i,
         totalBudgetCurrency: data["currency"]
       }.to_json
   
@@ -42,7 +42,7 @@ module Agent
       request.body = {
         :title => data["title"],
         :advertiserId => data["advertiser_id"],
-        :totalBudgetCents => data["budget"],
+        :totalBudgetCents => data["budget_cents"],
         :totalBudgetCurrency => data["currency"],
       }.to_json
   
