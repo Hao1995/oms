@@ -27,7 +27,7 @@
 
       <div class="mb-4">
         <%= form.label :budget_cents, "Budget (cents)", class: "block text-gray-700" %>
-        <%= form.number_field :budget_cents, class: "mt-1 block w-full border-gray-300 rounded-md p-2 text-lg" %>
+        <%= form.number_field :budget_cents, step: 0.01, class: "mt-1 block w-full border-gray-300 rounded-md p-2 text-lg" %>
       </div>
 
       <div class="mb-4">
