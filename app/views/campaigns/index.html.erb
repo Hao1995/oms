@@ -22,7 +22,10 @@
           <td class="py-2 px-4 space-x-2">
             <%= link_to 'Show', platform_campaign_path(@platform, campaign), class: "text-blue-600 hover:text-blue-800" %>
             <%= link_to 'Edit', edit_platform_campaign_path(@platform, campaign), class: "text-green-600 hover:text-green-800" %>
-            <%= link_to 'Delete', platform_campaign_path(@platform, campaign), method: :delete, data: { confirm: 'Are you sure?' }, class: "text-red-600 hover:text-red-800" %>
+            <%= link_to 'Delete', platform_campaign_path(@platform, campaign),
+            data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' },
+            class: "text-red-600 hover:text-red-800" %>
+
           </td>
         </tr>
       <% end %>

@@ -4,5 +4,7 @@ As an Order Management System, integrating advertisements, orders, campaigns, et
 
 Rund api server
 ```
+bin/rails assets:clobber
+bin/rails assets:precompile
 bin/rails s
 ```

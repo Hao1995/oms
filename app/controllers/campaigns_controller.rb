@@ -14,7 +14,7 @@ class CampaignsController < ApplicationController
 
   def show
     if @campaign.nil?
-      redirect_to campaigns_url, alert: 'Campaign not found.'
+      redirect_to platform_campaign_path(@platform, @campaign), alert: 'Campaign not found.'
     end
   end
 
@@ -65,7 +65,7 @@ class CampaignsController < ApplicationController
   def destroy
     @platform_api.delete_campaign(@campaign.platform_campaign_id)
     @campaign.destroy
-    redirect_to campaigns_url, notice: 'Campaign was successfully destroyed.'
+    redirect_to platform_campaigns_path(@platform), notice: 'Campaign was successfully destroyed.'
   end
 
   private
@@ -80,7 +80,6 @@ class CampaignsController < ApplicationController
 
   def set_campaign
     @campaign = Campaign.find_by(id: params[:id])
-    redirect_to campaigns_url, alert: 'Campaign not found.' unless @campaign
   end
 
   def campaign_params
