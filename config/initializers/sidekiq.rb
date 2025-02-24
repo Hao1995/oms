@@ -16,3 +16,8 @@ end
 Sidekiq.configure_client do |config|
   config.redis = { url: ENV.fetch('REDIS_URL', 'redis://localhost:6379/0') }
 end
+
+Rails.application.config.after_initialize do
+  # Init advertisers data at the beginning
+  AdvertiserSyncWorker.perform_sync
+end

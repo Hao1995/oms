@@ -4,8 +4,6 @@ class CampaignsController < ApplicationController
   before_action :set_platform, :set_platform_api
   before_action :set_campaign, only: [:show, :edit, :update, :destroy]
 
-  CUSTOMER_ID = 123
-
   def index
     per_page = params.fetch(:per_page, 10).to_i
     page = params.fetch(:page, 1).to_i
@@ -26,7 +24,7 @@ class CampaignsController < ApplicationController
   end
 
   def create
-    platform_campaign_dto = @platform_api.create_campaign(campaign_params)
+    platform_campaign_dto = @platform_api.campaign_api.create(campaign_params)
     @campaign = Campaign.new(campaign_params.merge({
       platform_id: @platform.id,
       platform_campaign_id: platform_campaign_dto.id
@@ -40,12 +38,12 @@ class CampaignsController < ApplicationController
   end
 
   def update
-    platform_campaign_dto = @platform_api.get_campaign(@campaign.platform_campaign_id)
+    platform_campaign_dto = @platform_api.campaign_api.get(@campaign.platform_campaign_id)
     same = are_campaigns_same?(@campaign, platform_campaign_dto)
 
     if same || (!same && platform_campaign_dto.updated_at < @campaign.updated_at)
       Rails.logger.info "PUT /campaigns/:id. platform data is old, updating platform"
-      @platform_api.update_campaign(@campaign.platform_campaign_id, campaign_params)
+      @platform_api.campaign_api.update(@campaign.platform_campaign_id, campaign_params)
       @campaign.update!(campaign_params)
     else
       Rails.logger.info "PUT /campaigns/:id. platform data is new, syncing from platform's campaign data"
@@ -63,7 +61,7 @@ class CampaignsController < ApplicationController
   end
 
   def destroy
-    @platform_api.delete_campaign(@campaign.platform_campaign_id)
+    @platform_api.campaign_api.delete(@campaign.platform_campaign_id)
     @campaign.destroy
     redirect_to platform_campaigns_path(@platform), notice: 'Campaign was successfully destroyed.'
   end
@@ -84,7 +82,7 @@ class CampaignsController < ApplicationController
 
   def campaign_params
     params.require(:campaign).permit(:platform_id, :platform_campaign_id, :title, :currency, :budget_cents, :advertiser_id)
-          .merge(customer_id: CUSTOMER_ID)
+          .merge(customer_id: ENV["CUSTOMER_ID"])
   end
 
   def are_campaigns_same?(origin_campaign, platform_campaign_dto)
