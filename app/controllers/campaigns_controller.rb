@@ -6,9 +6,39 @@ class CampaignsController < ApplicationController
   before_action :set_advertisers, only: [:new, :edit]
 
   def index
+    campaigns = Campaign.includes(:advertiser)
+
+    # Title
+    campaigns = campaigns.where("title LIKE ?", "#{params[:title]}%") if params[:title].present?
+
+    # Advertiser ID
+    campaigns = campaigns.where(advertiser_id: params[:advertiser_id]) if params[:advertiser_id].present?
+
+    # Budget Cents
+    if params[:budget_cents_min].present? && params[:budget_cents_max].present?
+      campaigns = campaigns.where(budget_cents: params[:budget_cents_min]..params[:budget_cents_max])
+    elsif params[:budget_cents_min].present?
+      campaigns = campaigns.where("budget_cents >= ?", params[:budget_cents_min])
+    elsif params[:budget_cents_max].present?
+      campaigns = campaigns.where("budget_cents <= ?", params[:budget_cents_max])
+    end
+
+    # Currency
+    campaigns = campaigns.where(currency: params[:currency]) if params[:currency].present?
+
+    # Created At
+    if params[:created_from].present? && params[:created_to].present?
+      campaigns = campaigns.where(created_at: params[:created_from]..params[:created_to])
+    elsif params[:created_from].present?
+      campaigns = campaigns.where("created_at >= ?", params[:created_from])
+    elsif params[:created_to].present?
+      campaigns = campaigns.where("created_at <= ?", params[:created_to])
+    end
+
+    # Pagination
     per_page = params.fetch(:per_page, 10).to_i
     page = params.fetch(:page, 1).to_i
-    @campaigns = Campaign.includes(:advertiser).page(page).per(per_page)
+    @campaigns = campaigns.page(page).per(per_page)
   end
 
   def show
