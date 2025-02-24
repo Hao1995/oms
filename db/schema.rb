@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_02_24_060228) do
+ActiveRecord::Schema[8.0].define(version: 2025_02_24_065109) do
   create_table "advertisers", charset: "utf8mb3", force: :cascade do |t|
     t.integer "customer_id"
     t.integer "platform_id"

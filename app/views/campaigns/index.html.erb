@@ -6,7 +6,7 @@
     <thead class="bg-gray-100">
       <tr>
         <th class="py-2 px-4 text-left">Title</th>
-        <th class="py-2 px-4 text-left">Advertiser ID</th>
+        <th class="py-2 px-4 text-left">Advertiser Name</th>
         <th class="py-2 px-4 text-left">Budget</th>
         <th class="py-2 px-4 text-left">Currency</th>
         <th class="py-2 px-4 text-left">Actions</th>
@@ -16,20 +16,22 @@
       <% @campaigns.each do |campaign| %>
         <tr class="border-b hover:bg-gray-50">
           <td class="py-2 px-4"><%= campaign.title %></td>
-          <td class="py-2 px-4"><%= campaign.advertiser_id %></td>
+          <td class="py-2 px-4"><%= campaign.advertiser.name %></td>
           <td class="py-2 px-4"><%= campaign.budget_cents %></td>
           <td class="py-2 px-4"><%= campaign.currency %></td>
-          <td class="py-2 px-4 space-x-2">
-            <%= link_to 'Show', platform_campaign_path(@platform, campaign), class: 'bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600' %>
-            <%= link_to 'Edit', edit_platform_campaign_path(@platform, campaign), class: 'bg-emerald-500 text-white py-2 px-4 rounded-lg hover:bg-emerald-600' %>
-            <%= link_to 'Delete', platform_campaign_path(@platform, campaign), data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: 'bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600' %>
+          <td class="py-2 px-4">
+            <div class="flex flex-wrap gap-2">
+              <%= link_to 'Show', platform_campaign_path(@platform, campaign), class: 'bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600' %>
+              <%= link_to 'Edit', edit_platform_campaign_path(@platform, campaign), class: 'bg-emerald-500 text-white py-2 px-4 rounded-lg hover:bg-emerald-600' %>
+              <%= link_to 'Delete', platform_campaign_path(@platform, campaign), data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: 'bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600' %>
+            </div>
           </td>
         </tr>
       <% end %>
     </tbody>
   </table>
 
-  <div class="mt-4">
+  <div class="flex flex-wrap gap-2">
     <%= link_to 'New Campaign', new_platform_campaign_path(@platform), class: "inline-block bg-teal-500 text-white py-2 px-4 rounded-lg hover:bg-teal-600" %>
   </div>
 

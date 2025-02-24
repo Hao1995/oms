@@ -3,11 +3,12 @@ class CampaignsController < ApplicationController
 
   before_action :set_platform, :set_platform_api
   before_action :set_campaign, only: [:show, :edit, :update, :destroy]
+  before_action :set_advertisers, only: [:new, :edit]
 
   def index
     per_page = params.fetch(:per_page, 10).to_i
     page = params.fetch(:page, 1).to_i
-    @campaigns = Campaign.page(page).per(per_page)
+    @campaigns = Campaign.includes(:advertiser).page(page).per(per_page)
   end
 
   def show
@@ -24,7 +25,11 @@ class CampaignsController < ApplicationController
   end
 
   def create
-    platform_campaign_dto = @platform_api.campaign_api.create(campaign_params)
+    advertiser = Advertiser.find_by(campaign_params[:advertiser_id])
+    data = campaign_params
+    data["advertiser_id"] = advertiser.platform_advertiser_id
+
+    platform_campaign_dto = @platform_api.campaign_api.create(data)
     @campaign = Campaign.new(campaign_params.merge({
       platform_id: @platform.id,
       platform_campaign_id: platform_campaign_dto.id
@@ -33,7 +38,7 @@ class CampaignsController < ApplicationController
     if @campaign.save
       redirect_to platform_campaign_path(@platform, @campaign), notice: 'Campaign was successfully created.'
     else
-      render :new, status: :unprocessable_entity
+      redirect_to platform_campaigns_path(@platform), alert: 'Failed to create campaign.'
     end
   end
 
@@ -41,23 +46,42 @@ class CampaignsController < ApplicationController
     platform_campaign_dto = @platform_api.campaign_api.get(@campaign.platform_campaign_id)
     same = are_campaigns_same?(@campaign, platform_campaign_dto)
 
-    if same || (!same && platform_campaign_dto.updated_at < @campaign.updated_at)
-      Rails.logger.info "PUT /campaigns/:id. platform data is old, updating platform"
-      @platform_api.campaign_api.update(@campaign.platform_campaign_id, campaign_params)
-      @campaign.update!(campaign_params)
-    else
-      Rails.logger.info "PUT /campaigns/:id. platform data is new, syncing from platform's campaign data"
-      @campaign.update!(
-        title: platform_campaign_dto.title,
-        advertiser_id: platform_campaign_dto.advertiser_id,
-        budget_cents: platform_campaign_dto.budget_cents.to_s,
-        currency: platform_campaign_dto.currency
-      )
-    end
+    message = "Campaign not changes"
+    unless same
+      if platform_campaign_dto.updated_at > @campaign.updated_at
+        Rails.logger.info "[CampaignsController] Update. platform data is new, syncing from platform's campaign data"
 
-    redirect_to @campaign, notice: 'Campaign was successfully updated.'
-  rescue
-    render :edit, status: :unprocessable_entity
+        advertiser = Advertiser.find_by(
+          customer_id: ENV["CUSTOMER_ID"],
+          platform_id: @platform.id,
+          platform_advertiser_id: platform_campaign_dto.advertiser_id
+        )
+
+        @campaign.update!(
+          title: platform_campaign_dto.title,
+          advertiser_id: advertiser.id,
+          budget_cents: platform_campaign_dto.budget_cents.to_s,
+          currency: platform_campaign_dto.currency
+        )
+
+        message = "Cancel the update, due to data updates on the platform"
+      else
+        Rails.logger.info "[CampaignsController] Update. platform data is old, updating platform"
+
+        advertiser = Advertiser.find_by(campaign_params[:advertiser_id])
+        data = campaign_params
+        data["advertiser_id"] = advertiser.platform_advertiser_id
+        @platform_api.campaign_api.update(@campaign.platform_campaign_id, data)
+
+        @campaign.update!(campaign_params)
+
+        message = "Update the campaign successfully"
+      end
+    end
+    redirect_to platform_campaign_path(@platform, @campaign), notice: message
+  rescue => e
+    Rails.logger.error "[CampaignsController] Update. Error: #{e.message}"
+    redirect_to edit_platform_campaign_path(@platform, @campaign), alert: 'Failed to update campaign.'
   end
 
   def destroy
@@ -78,6 +102,11 @@ class CampaignsController < ApplicationController
 
   def set_campaign
     @campaign = Campaign.find_by(id: params[:id])
+  end
+
+  def set_advertisers
+    @advertisers = Advertiser.where(customer_id: ENV["CUSTOMER_ID"])
+                            .where(platform_id: @platform.id)
   end
 
   def campaign_params
