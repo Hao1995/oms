@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_02_24_090148) do
+ActiveRecord::Schema[8.0].define(version: 2025_02_24_100703) do
   create_table "advertisers", charset: "utf8mb3", force: :cascade do |t|
     t.integer "customer_id"
     t.integer "platform_id"
@@ -19,6 +19,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_24_090148) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["customer_id", "platform_id", "platform_advertiser_id"], name: "idx_on_customer_id_platform_id_platform_advertiser__e6c2ee718c", unique: true
+    t.index ["name"], name: "index_advertisers_on_name"
   end
 
   create_table "agents_tables", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -37,13 +38,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_24_090148) do
     t.string "advertiser_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-
-    t.index ["title"], name: "index_campaigns_on_title"
-    t.index ["budget_cents"], name: "index_campaigns_on_budget_cents"
-    t.index ["currency"], name: "index_campaigns_on_currency"
     t.index ["advertiser_id"], name: "index_campaigns_on_advertiser_id"
+    t.index ["budget_cents"], name: "index_campaigns_on_budget_cents"
     t.index ["created_at"], name: "index_campaigns_on_created_at"
+    t.index ["currency"], name: "index_campaigns_on_currency"
     t.index ["customer_id", "platform_id", "platform_campaign_id"], name: "idx_on_customer_id_platform_id_platform_campaign_id_0009bccddc", unique: true
+    t.index ["title"], name: "index_campaigns_on_title"
+    t.index ["updated_at"], name: "index_campaigns_on_updated_at"
   end
 
   create_table "platforms", id: :integer, charset: "utf8mb3", force: :cascade do |t|

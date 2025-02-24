@@ -2,13 +2,82 @@
 <div class="container mx-auto py-8">
   <h1 class="text-2xl font-bold mb-4">Campaigns List</h1>
 
+  <!-- Search Filters Form -->
+  <%= form_with url: platform_campaigns_path(@platform), method: :get, local: true, class: "mb-6 p-4 bg-gray-50 rounded-lg shadow" do |f| %>
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <!-- Title Filter -->
+      <div>
+        <%= f.label :title, "Title", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.text_field :title, value: params[:title], class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+      </div>
+
+      <!-- Advertiser Dropdown -->
+      <div>
+        <%= f.label :advertiser_id, "Advertiser", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.select :advertiser_id, options_from_collection_for_select(@advertisers, :id, :name, params[:advertiser_id]), { include_blank: true }, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+      </div>
+
+      <!-- Budget Min (Cents) -->
+      <div>
+        <%= f.label :budget_cents_min, "Budget Min (Cents)", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.number_field :budget_cents_min, value: params[:budget_cents_min], class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+      </div>
+
+      <!-- Budget Max (Cents) -->
+      <div>
+        <%= f.label :budget_cents_max, "Budget Max (Cents)", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.number_field :budget_cents_max, value: params[:budget_cents_max], class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+      </div>
+
+      <!-- Currency -->
+      <div>
+        <%= f.label :currency, "Currency", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.text_field :currency, value: params[:currency], class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+      </div>
+
+      <!-- Created At Range -->
+      <div class="col-span-1 md:col-span-2 lg:col-span-2 flex gap-2">
+        <div class="flex-1">
+          <%= f.label :created_from, "Created From", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.date_field :created_from, value: params[:created_from], class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+        </div>
+        <div class="flex-1">
+          <%= f.label :created_to, "Created To", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.date_field :created_to, value: params[:created_to], class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+        </div>
+      </div>
+
+      <!-- Updated At Range -->
+      <div class="col-span-1 md:col-span-2 lg:col-span-2 flex gap-2">
+        <div class="flex-1">
+          <%= f.label :updated_from, "Updated From", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.date_field :updated_from, value: params[:updated_from], class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+        </div>
+        <div class="flex-1">
+          <%= f.label :updated_to, "Updated To", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.date_field :updated_to, value: params[:updated_to], class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 flex justify-end gap-2">
+      <%= f.submit "Search", class: "bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600" %>
+      <%= link_to "Clear", platform_campaigns_path(@platform), class: "bg-gray-300 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-400" %>
+    </div>
+  <% end %>
+
+  <!-- Campaigns Table -->
   <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
     <thead class="bg-gray-100">
       <tr>
-        <th class="py-2 px-4 text-left">Title</th>
-        <th class="py-2 px-4 text-left">Advertiser Name</th>
-        <th class="py-2 px-4 text-left">Budget</th>
-        <th class="py-2 px-4 text-left">Currency</th>
+        <% ["title", "advertiser_name", "budget_cents", "currency", "created_at", "updated_at"].each do |col| %>
+          <th class="py-2 px-4 text-left">
+            <%= link_to col.humanize, platform_campaigns_path(@platform, params.permit!.merge(sort_by: col, sort_direction: params[:sort_direction] == "asc" ? "desc" : "asc")), class: "text-blue-500 hover:text-blue-700" %>
+            <% if params[:sort_by] == col %>
+              <%= params[:sort_direction] == "asc" ? "▲" : "▼" %>
+            <% end %>
+          </th>
+        <% end %>
         <th class="py-2 px-4 text-left">Actions</th>
       </tr>
     </thead>
@@ -19,24 +88,23 @@
           <td class="py-2 px-4"><%= campaign.advertiser.name %></td>
           <td class="py-2 px-4"><%= campaign.budget_cents %></td>
           <td class="py-2 px-4"><%= campaign.currency %></td>
-          <td class="py-2 px-4">
-            <div class="flex flex-wrap gap-2">
-              <%= link_to 'Show', platform_campaign_path(@platform, campaign), class: 'bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600' %>
-              <%= link_to 'Edit', edit_platform_campaign_path(@platform, campaign), class: 'bg-emerald-500 text-white py-2 px-4 rounded-lg hover:bg-emerald-600' %>
-              <%= link_to 'Delete', platform_campaign_path(@platform, campaign), data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: 'bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600' %>
-            </div>
+          <td class="py-2 px-4"><%= campaign.created_at.strftime("%Y-%m-%d") %></td>
+          <td class="py-2 px-4"><%= campaign.updated_at.strftime("%Y-%m-%d") %></td>
+          <td class="py-2 px-4 flex flex-wrap gap-2">
+            <%= link_to "Show", platform_campaign_path(@platform, campaign), class: "bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600" %>
+            <%= link_to "Edit", edit_platform_campaign_path(@platform, campaign), class: "bg-emerald-500 text-white py-2 px-4 rounded-lg hover:bg-emerald-600" %>
+            <%= link_to "Delete", platform_campaign_path(@platform, campaign), data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600" %>
           </td>
         </tr>
       <% end %>
     </tbody>
   </table>
 
-  <div class="flex flex-wrap gap-2">
-    <%= link_to 'New Campaign', new_platform_campaign_path(@platform), class: "inline-block bg-teal-500 text-white py-2 px-4 rounded-lg hover:bg-teal-600" %>
+  <div class="mt-4">
+    <%= link_to "New Campaign", new_platform_campaign_path(@platform), class: "inline-block bg-teal-500 text-white py-2 px-4 rounded-lg hover:bg-teal-600" %>
   </div>
 
   <div class="mt-4 flex justify-center">
     <%= paginate @campaigns, class: 'flex space-x-2', page_link_class: 'bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600' %>
   </div>
-
 </div>

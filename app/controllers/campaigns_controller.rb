@@ -3,7 +3,7 @@ class CampaignsController < ApplicationController
 
   before_action :set_platform, :set_platform_api
   before_action :set_campaign, only: [:show, :edit, :update, :destroy]
-  before_action :set_advertisers, only: [:new, :edit]
+  before_action :set_advertisers, only: [:new, :edit, :index]
 
   def index
     campaigns = Campaign.includes(:advertiser)
@@ -33,6 +33,26 @@ class CampaignsController < ApplicationController
       campaigns = campaigns.where("created_at >= ?", params[:created_from])
     elsif params[:created_to].present?
       campaigns = campaigns.where("created_at <= ?", params[:created_to])
+    end
+
+    # Updated At
+    if params[:updated_from].present? && params[:updated_to].present?
+      campaigns = campaigns.where(updated_at: params[:updated_from]..params[:updated_to])
+    elsif params[:updated_from].present?
+      campaigns = campaigns.where("updated_at >= ?", params[:updated_from])
+    elsif params[:updated_to].present?
+      campaigns = campaigns.where("updated_at <= ?", params[:updated_to])
+    end
+
+    # Sorting
+    sort_column = params.fetch(:sort_by, 'created_at')
+    sort_direction = params.fetch(:sort_direction, 'desc')
+
+    if sort_column == 'advertiser_name'
+      campaigns = campaigns.joins(:advertiser)
+      campaigns = campaigns.order("advertisers.name" => sort_direction)
+    else
+      campaigns = campaigns.order(sort_column => sort_direction)
     end
 
     # Pagination
