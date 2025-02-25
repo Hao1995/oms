@@ -7,6 +7,8 @@ class CampaignsController < ApplicationController
 
   def index
     campaigns = Campaign.includes(:advertiser)
+                        .where(customer_id: ENV["CUSTOMER_ID"])
+                        .where(platform_id: params[:platform_id])
 
     # Title
     campaigns = campaigns.where("title LIKE ?", "#{params[:title]}%") if params[:title].present?
@@ -151,7 +153,9 @@ class CampaignsController < ApplicationController
   end
 
   def set_campaign
-    @campaign = Campaign.find_by(id: params[:id])
+    @campaign = Campaign.where(customer_id: ENV["CUSTOMER_ID"])
+                        .where(platform_id: params[:platform_id])
+                        .find_by(id: params[:id])
   end
 
   def set_advertisers
