@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_02_25_025002) do
+ActiveRecord::Schema[8.0].define(version: 2025_02_25_025401) do
   create_table "advertisers", charset: "utf8mb3", force: :cascade do |t|
     t.integer "customer_id"
     t.integer "platform_id"
@@ -30,6 +30,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_25_025002) do
     t.string "currency", null: false
     t.decimal "budget_cents", precision: 65, scale: 2, null: false
     t.string "advertiser_id", null: false
+    t.column "status", "enum('open','archive')", default: "open", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["advertiser_id"], name: "index_campaigns_on_advertiser_id"

@@ -27,6 +27,14 @@
         <p class="mt-1 block w-full border-gray-300 rounded-md p-2 text-lg"><%= @campaign.budget_cents %></p>
       </div>
       <div class="mb-4">
+        <p class="block text-gray-700">Currency</p>
+        <p class="mt-1 block w-full border-gray-300 rounded-md p-2 text-lg"><%= @campaign.currency %></p>
+      </div>
+      <div class="mb-4">
+        <p class="block text-gray-700">Status</p>
+        <p class="mt-1 block w-full border-gray-300 rounded-md p-2 text-lg"><%= @campaign.status.humanize %></p>
+      </div>
+      <div class="mb-4">
         <p class="block text-gray-700">Created At</p>
         <p class="mt-1 block w-full border-gray-300 rounded-md p-2 text-lg"><%= @campaign.created_at %></p>
       </div>

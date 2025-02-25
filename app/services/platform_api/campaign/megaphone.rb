@@ -80,7 +80,7 @@ module PlatformApi
 
       def send_request(uri, request)
         Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == 'https') do |http|
-          Rails.logger.debug "[MegaphoneAgent] Request. uri: #{uri}, request: #{request.body}"
+          Rails.logger.debug "[MegaphoneAgent] Request. method: #{request.method}, uri: #{uri}, request: #{request.body}"
           response = http.request(request)
           Rails.logger.debug "[MegaphoneAgent] Response: #{response.code} - #{response.body}"
           response

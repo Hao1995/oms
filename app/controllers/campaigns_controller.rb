@@ -28,6 +28,9 @@ class CampaignsController < ApplicationController
     # Currency
     campaigns = campaigns.where(currency: params[:currency]) if params[:currency].present?
 
+    # Currency
+    campaigns = campaigns.where(status: params[:status]) if params[:status].present?
+
     # Created At
     if params[:created_from].present? && params[:created_to].present?
       campaigns = campaigns.where(created_at: params[:created_from]..params[:created_to])
@@ -95,50 +98,85 @@ class CampaignsController < ApplicationController
   end
 
   def update
-    platform_campaign_dto = @platform_api.campaign_api.get(@campaign.platform_campaign_id)
-    same = are_campaigns_same?(@campaign, platform_campaign_dto)
+    if @campaign.status == "open"
+      platform_campaign_dto = @platform_api.campaign_api.get(@campaign.platform_campaign_id)
 
-    message = "Campaign not changes"
-    unless same
-      if platform_campaign_dto.updated_at > @campaign.updated_at
-        Rails.logger.info "[CampaignsController] Update. platform data is new, syncing from platform's campaign data"
-
-        advertiser = Advertiser.find_by(
-          customer_id: ENV["CUSTOMER_ID"],
-          platform_id: @platform.id,
-          platform_advertiser_id: platform_campaign_dto.advertiser_id
-        )
-
-        @campaign.update!(
-          title: platform_campaign_dto.title,
-          advertiser_id: advertiser.id,
-          budget_cents: platform_campaign_dto.budget_cents.to_s,
-          currency: platform_campaign_dto.currency
-        )
-
-        message = "Cancel the update, due to data updates on the platform"
-      else
-        Rails.logger.info "[CampaignsController] Update. platform data is old, updating platform"
-
-        advertiser = Advertiser.find_by(campaign_params[:advertiser_id])
-        data = campaign_params
-        data["advertiser_id"] = advertiser.platform_advertiser_id
-        @platform_api.campaign_api.update(@campaign.platform_campaign_id, data)
-
-        @campaign.update!(campaign_params)
-
-        message = "Update the campaign successfully"
+      # case: same campaigns
+      if are_campaigns_same_content?(platform_campaign_dto)
+        Rails.logger.debug "[CampaignsController] Update. status: open, campaign no changes"
+        redirect_to platform_campaign_path(@platform, @campaign), notice: "Campaign no changes"
+        return
       end
     end
-    redirect_to platform_campaign_path(@platform, @campaign), notice: message
+
+    if campaign_params["status"].present?
+      Rails.logger.debug "[CampaignsController] Update. status is present."
+      update_data = campaign_params
+      case campaign_params["status"]
+      when "open"
+        data = campaign_params.permit(:title, :advertiser_id, :budget_cents, :currency)
+        data["advertiser_id"] = Advertiser.select(:platform_advertiser_id)
+                                          .find(campaign_params[:advertiser_id])
+                                          .platform_advertiser_id
+        platform_campaign_dto = @platform_api.campaign_api.create(data)
+        update_data["platform_campaign_id"] = platform_campaign_dto.id
+      when "archive"
+        @platform_api.campaign_api.delete(@campaign.platform_campaign_id)
+      else
+        Rails.logger.warn "[CampaignsController] Update. invalid `status` parameter"
+        redirect_to platform_campaign_path(@platform, @campaign), alert: "Invalid `status` parameter"
+        return
+      end
+
+      @campaign.update!(update_data)
+      redirect_to platform_campaign_path(@platform, @campaign), notice: "Update campaign successfully"
+      return
+    end
+
+    # case: difference campaigns - platform's campaign is new
+    if platform_campaign_dto.updated_at > @campaign.updated_at
+      Rails.logger.info "[CampaignsController] Update. platform data is new, syncing from platform's campaign data"
+
+      advertiser_id = Advertiser.select(:id)
+                                .find_by(
+                                  customer_id: ENV["CUSTOMER_ID"],
+                                  platform_id: @platform.id,
+                                  platform_advertiser_id: platform_campaign_dto.advertiser_id
+                                )
+
+      @campaign.update!(
+        title: platform_campaign_dto.title,
+        advertiser_id: advertiser_id,
+        budget_cents: platform_campaign_dto.budget_cents.to_s,
+        currency: platform_campaign_dto.currency
+      )
+
+      redirect_to platform_campaign_path(@platform, @campaign), alert: "Cancel the update, due to data updates on the platform"
+      return
+    end
+
+    # case: difference campaigns - platform's campaign is old
+    Rails.logger.info "[CampaignsController] Update. platform data is old, updating platform"
+
+    if @campaign.status == "open"
+      data = campaign_params
+      data["advertiser_id"] = Advertiser.select(:platform_advertiser_id)
+                                        .find(campaign_params[:advertiser_id])
+                                        .platform_advertiser_id
+      @platform_api.campaign_api.update(@campaign.platform_campaign_id, data)
+    end
+
+    @campaign.update!(campaign_params)
+
+    redirect_to platform_campaign_path(@platform, @campaign), notice: "Update the campaign successfully"
   rescue => e
     Rails.logger.error "[CampaignsController] Update. Error: #{e.message}"
     redirect_to edit_platform_campaign_path(@platform, @campaign), alert: 'Failed to update campaign.'
   end
 
   def destroy
-    @platform_api.campaign_api.delete(@campaign.platform_campaign_id)
     @campaign.destroy
+    @platform_api.campaign_api.delete(@campaign.platform_campaign_id)
     redirect_to platform_campaigns_path(@platform), notice: 'Campaign was successfully destroyed.'
   end
 
@@ -164,14 +202,22 @@ class CampaignsController < ApplicationController
   end
 
   def campaign_params
-    params.require(:campaign).permit(:platform_id, :platform_campaign_id, :title, :currency, :budget_cents, :advertiser_id)
-          .merge(customer_id: ENV["CUSTOMER_ID"])
+    params.require(:campaign)
+          .permit(
+            :platform_id, 
+            :platform_campaign_id, 
+            :title, 
+            :currency, 
+            :budget_cents, 
+            :advertiser_id,
+            :status
+          ).merge(customer_id: ENV["CUSTOMER_ID"])
   end
 
-  def are_campaigns_same?(origin_campaign, platform_campaign_dto)
-    platform_campaign_dto.title == origin_campaign.title &&
-    platform_campaign_dto.advertiser_id == origin_campaign.advertiser_id &&
-    platform_campaign_dto.budget_cents == origin_campaign.budget_cents &&
-    platform_campaign_dto.currency == origin_campaign.currency
+  def are_campaigns_same_content?(platform_campaign_dto)
+    platform_campaign_dto.title == campaign_params[:title] &&
+    platform_campaign_dto.advertiser_id == campaign_params[:advertiser_id] &&
+    platform_campaign_dto.budget_cents == campaign_params[:budget_cents] &&
+    platform_campaign_dto.currency == campaign_params[:currency]
   end
 end
