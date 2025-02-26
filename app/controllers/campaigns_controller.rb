@@ -90,7 +90,7 @@ class CampaignsController < ApplicationController
       platform_campaign_id: platform_campaign_dto.id
     }))
 
-    redirect_to platform_campaign_path(@platform, @campaign), notice: "Campaign was successfully created." if @campaign.save
+    return redirect_to platform_campaign_path(@platform, @campaign), notice: "Campaign was successfully created." if @campaign.save
     redirect_to platform_campaigns_path(@platform), alert: "Failed to create campaign."
   end
 

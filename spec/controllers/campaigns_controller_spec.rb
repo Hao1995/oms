@@ -138,4 +138,58 @@ RSpec.describe CampaignsController, type: :controller do
       end
     end
   end
+
+  describe 'POST #create' do
+    let(:platform) { create(:platform) }
+    let(:advertiser) { create(:advertiser, platform_advertiser_id: '1234') }
+    let(:valid_attributes) do
+      {
+        title: 'Test Campaign',
+        advertiser_id: advertiser.id,
+        currency: 'USD',
+        budget_cents: 500000 # Represents $5000
+      }
+    end
+
+    let(:invalid_attributes) do
+      {
+        title: nil, # Required
+        advertiser_id: advertiser.id,
+        currency: nil, # Required
+        budget_cents: nil # Required
+      }
+    end
+
+    let(:campaign_api) { double("CampaignApi") }
+    let(:platform_api_double) { double("PlatformApi", campaign_api: campaign_api) }
+
+    before do
+      allow(Advertiser).to receive(:find_by).with(advertiser.id.to_s).and_return(advertiser)
+      allow(campaign_api).to receive(:create).and_return(double(id: "5678"))
+      allow(PlatformApi::Factory).to receive(:get_platform).and_return(platform_api_double)
+    end
+
+    context 'when the campaign is successfully created' do
+      it 'creates a new campaign and redirects to the campaign show page' do
+        expect {
+          post :create, params: { campaign: valid_attributes, platform_id: platform.id }
+        }.to change(Campaign, :count).by(1)
+
+        campaign = Campaign.last
+        expect(response).to redirect_to(platform_campaign_path(platform, campaign))
+        expect(flash[:notice]).to eq('Campaign was successfully created.')
+      end
+    end
+
+    context 'when the campaign creation fails' do
+      it 'does not create a campaign and redirects with an alert' do
+        expect {
+          post :create, params: { campaign: invalid_attributes, platform_id: platform.id }
+        }.not_to change(Campaign, :count)
+
+        expect(response).to redirect_to(platform_campaigns_path(platform))
+        expect(flash[:alert]).to eq('Failed to create campaign.')
+      end
+    end
+  end
 end
