@@ -1,9 +1,9 @@
-require 'json'
+require "json"
 
 class Event
   TYPE = {
-    :create_campaign => "create_campaign",
-    :update_campaign => "update_campaign",
+    create_campaign: "create_campaign",
+    update_campaign: "update_campaign"
   }
 
   attr_accessor :type, :data, :timestamp
@@ -14,7 +14,7 @@ class Event
     @timestamp = timestamp
   end
 
-  def to_json()
+  def to_json
     {
       type: @type,
       data: @data,
@@ -24,6 +24,6 @@ class Event
 
   def self.from_json(json)
     parsed = JSON.parse(json)
-    new(parsed['type'], parsed['data'], parsed['timestamp'])
+    new(parsed["type"], parsed["data"], parsed["timestamp"])
   end
 end

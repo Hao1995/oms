@@ -2,8 +2,8 @@ class CampaignsController < ApplicationController
   include Paginatable
 
   before_action :set_platform, :set_platform_api
-  before_action :set_campaign, only: [:show, :edit, :update, :destroy]
-  before_action :set_advertisers, only: [:new, :edit, :index]
+  before_action :set_campaign, only: [ :show, :edit, :update, :destroy ]
+  before_action :set_advertisers, only: [ :new, :edit, :index ]
 
   def index
     campaigns = Campaign.includes(:advertiser)
@@ -50,10 +50,10 @@ class CampaignsController < ApplicationController
     end
 
     # Sorting
-    sort_column = params.fetch(:sort_by, 'created_at')
-    sort_direction = params.fetch(:sort_direction, 'desc')
+    sort_column = params.fetch(:sort_by, "created_at")
+    sort_direction = params.fetch(:sort_direction, "desc")
 
-    if sort_column == 'advertiser_name'
+    if sort_column == "advertiser_name"
       campaigns = campaigns.joins(:advertiser)
       campaigns = campaigns.order("advertisers.name" => sort_direction)
     else
@@ -68,7 +68,7 @@ class CampaignsController < ApplicationController
 
   def show
     if @campaign.nil?
-      redirect_to platform_campaign_path(@platform, @campaign), alert: 'Campaign not found.'
+      redirect_to platform_campaign_path(@platform, @campaign), alert: "Campaign not found."
     end
   end
 
@@ -90,8 +90,8 @@ class CampaignsController < ApplicationController
       platform_campaign_id: platform_campaign_dto.id
     }))
 
-    redirect_to platform_campaign_path(@platform, @campaign), notice: 'Campaign was successfully created.' if @campaign.save
-    redirect_to platform_campaigns_path(@platform), alert: 'Failed to create campaign.'
+    redirect_to platform_campaign_path(@platform, @campaign), notice: "Campaign was successfully created." if @campaign.save
+    redirect_to platform_campaigns_path(@platform), alert: "Failed to create campaign."
   end
 
   def update
@@ -100,13 +100,13 @@ class CampaignsController < ApplicationController
     resp_dto = service.action
 
     return redirect_to platform_campaign_path(@platform, @campaign), resp_dto.action => resp_dto.message if resp_dto.success
-    return redirect_to edit_platform_campaign_path(@platform, @campaign), resp_dto.action => resp_dto.message
+    redirect_to edit_platform_campaign_path(@platform, @campaign), resp_dto.action => resp_dto.message
   end
 
   def destroy
     @campaign.destroy
     @platform_api.campaign_api.delete(@campaign.platform_campaign_id)
-    redirect_to platform_campaigns_path(@platform), notice: 'Campaign was successfully destroyed.'
+    redirect_to platform_campaigns_path(@platform), notice: "Campaign was successfully destroyed."
   end
 
   private
@@ -134,11 +134,11 @@ class CampaignsController < ApplicationController
   def campaign_params
     params.require(:campaign)
           .permit(
-            :platform_id, 
-            :platform_campaign_id, 
-            :title, 
-            :currency, 
-            :budget_cents, 
+            :platform_id,
+            :platform_campaign_id,
+            :title,
+            :currency,
+            :budget_cents,
             :advertiser_id,
             :status
           ).merge(customer_id: ENV["CUSTOMER_ID"])

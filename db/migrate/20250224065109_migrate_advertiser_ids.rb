@@ -1,7 +1,7 @@
 class MigrateAdvertiserIds < ActiveRecord::Migration[8.0]
   def change
     platforms = Rails.application.config.platforms.keys
-    
+
     Platform.where(name: platforms).each do |platform|
       advertisersByPlatformID = Advertiser.all.each_with_object({}) do |advertiser, hash|
         hash[advertiser.platform_advertiser_id] = advertiser

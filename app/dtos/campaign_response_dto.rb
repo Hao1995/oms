@@ -10,7 +10,7 @@ class CampaignResponseDto
     @created_at = created_at
     @updated_at = updated_at
   end
-  
+
   def to_json
     {
       id: @id,

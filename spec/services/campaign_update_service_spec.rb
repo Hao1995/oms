@@ -83,7 +83,6 @@ RSpec.describe CampaignUpdaterService do
       end
 
       it "updates the campaign and redirects" do
-
         result = subject.action
 
         campaign.reload
@@ -114,8 +113,8 @@ RSpec.describe CampaignUpdaterService do
       before do
         platform_campaign_stub = double(
           id: campaign.platform_campaign_id,
-          title: "New Title", 
-          budget_cents: 10000, 
+          title: "New Title",
+          budget_cents: 10000,
           currency: "USD",
           advertiser_id: advertiser.platform_advertiser_id,
           updated_at: Time.zone.now
@@ -124,11 +123,11 @@ RSpec.describe CampaignUpdaterService do
         allow(campaign_api).to receive(:create).and_return(double(id: "new-platform-campaign-id"))
         allow(campaign_api).to receive(:update).and_return(true)
         allow(campaign_api).to receive(:delete).and_return(true)
-    
+
         allow_any_instance_of(Campaign).to receive(:updated_at).and_return(1.day.ago)
         allow(subject).to receive(:are_campaigns_same_content?).and_return(false)
       end
-    
+
       it "cancels update and redirects with an alert" do
         result = subject.action
 
@@ -139,7 +138,7 @@ RSpec.describe CampaignUpdaterService do
         })
       end
     end
-    
+
     context "when status changes" do
       before do
         platform_campaign_stub = double(

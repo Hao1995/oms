@@ -1,4 +1,4 @@
-module Http 
+module Http
   class BaseException < StandardError
     attr_accessor :status_code, :response_body
 

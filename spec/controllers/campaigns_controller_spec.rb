@@ -53,7 +53,7 @@ RSpec.describe CampaignsController, type: :controller do
       it "calls the service and redirects with notice" do
         params = { platform_id: platform.id, id: campaign.id, campaign: valid_attributes }
         put :update, params: params, as: :json
-        
+
         expect(CampaignUpdaterService).to have_received(:new).with(platform, campaign, platform_api_double, req_dto)
         expect(service_double).to have_received(:action)
         expect(response).to redirect_to(platform_campaign_path(platform, campaign))

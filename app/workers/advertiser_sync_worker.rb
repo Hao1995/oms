@@ -3,7 +3,7 @@ class AdvertiserSyncWorker
 
   def perform
     platforms = Rails.application.config.platforms.keys
-    
+
     Platform.where(name: platforms).each do |platform|
       # Get all advertiser from platform's api
       platform_api = PlatformApi::Factory.get_platform(platform.name)

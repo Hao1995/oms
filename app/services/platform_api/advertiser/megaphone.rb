@@ -1,6 +1,6 @@
-require 'net/http'
-require 'uri'
-require 'json'
+require "net/http"
+require "uri"
+require "json"
 
 module PlatformApi
   module Advertiser
@@ -10,11 +10,11 @@ module PlatformApi
       def initialize(platform_name)
         @platform_name = platform_name
         @headers = {
-          'Content-Type' => 'application/json',
-          'Authorization' => "Bearer #{ENV['MEGAPHONE_TOKEN']}"
+          "Content-Type" => "application/json",
+          "Authorization" => "Bearer #{ENV['MEGAPHONE_TOKEN']}"
         }
       end
-    
+
       def list(page: 1, per_page: 100)
         uri = URI("#{BASE_URL}?page=#{page}&per_page=#{per_page}")
         request = Net::HTTP::Get.new(uri, @headers)
@@ -23,9 +23,9 @@ module PlatformApi
         advertisers = JSON.parse(response.body)
 
         pagination_info = {
-          total: response['x-total'].to_i,
-          per_page: response['x-per-page'].to_i,
-          current_page: response['x-page'].to_i
+          total: response["x-total"].to_i,
+          per_page: response["x-per-page"].to_i,
+          current_page: response["x-page"].to_i
         }
 
         { advertisers: advertisers, pagination: pagination_info }
@@ -34,7 +34,7 @@ module PlatformApi
       private
 
       def send_request(uri, request)
-        Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == 'https') do |http|
+        Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https") do |http|
           Rails.logger.debug "[PlatformApi::Advertiser::Megaphone] Request. method: #{request.method}, uri: #{uri}, request: #{request.body}"
           response = http.request(request)
           Rails.logger.debug "[PlatformApi::Advertiser::Megaphone] Response: #{response.code} - #{response.body}"
@@ -43,7 +43,7 @@ module PlatformApi
       end
 
       def convert_to_response_dto(response)
-        unless response.code.to_i.in?([200, 201])
+        unless response.code.to_i.in?([ 200, 201 ])
           if response.is_a?(Net::HTTPTooManyRequests)
             raise Http::TooManyRequestsException.new(response.code, response&.body)
           end

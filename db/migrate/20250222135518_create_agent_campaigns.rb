@@ -7,7 +7,7 @@ class CreateAgentCampaigns < ActiveRecord::Migration[8.0]
       t.datetime :created_at, comment: "from agent data"
       t.datetime :updated_at, comment: "from agent data"
     end
-    
-    add_index :agent_campaigns, [:campaign_id, :agent, :agent_campaign_id], unique: true, name: "uq_idx_campaign_agent"
+
+    add_index :agent_campaigns, [ :campaign_id, :agent, :agent_campaign_id ], unique: true, name: "uq_idx_campaign_agent"
   end
 end

@@ -24,6 +24,6 @@ module Oms
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
 
-    config.platforms = YAML.load_file(Rails.root.join('config', 'platforms.yml'))['platforms']
+    config.platforms = YAML.load_file(Rails.root.join("config", "platforms.yml"))["platforms"]
   end
 end

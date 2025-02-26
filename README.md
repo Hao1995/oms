@@ -48,6 +48,11 @@ Stop applications
 make down-infra
 ```
 
+Fix lint
+```
+make fix-lint
+```
+
 ## Run Test
 Set up databases
 ```
@@ -62,12 +67,12 @@ RAILS_ENV=test rails db:migrate
 
 Run all tests
 ```
-bundle exec rspec
+make test
 ```
 
 Check coverage
 ```
-open coverage/index.html
+make open-coverage
 ```
 
 Run a single test

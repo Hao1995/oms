@@ -7,4 +7,4 @@ Rails.application.config.assets.version = "1.0"
 # Rails.application.config.assets.paths << Emoji.images_path
 
 Rails.application.config.assets.paths << Rails.root.join("app/assets/tailwind")
-Rails.application.config.assets.precompile += %w( tailwind.css )
+Rails.application.config.assets.precompile += %w[ tailwind.css ]

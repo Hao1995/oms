@@ -12,7 +12,7 @@ module Campaigns
       {
         success: @success,
         action: @action,
-        message: @message,
+        message: @message
       }
     end
   end

@@ -44,15 +44,15 @@ gem "mysql2"
 
 gem "rubocop", require: false
 
-gem 'kaminari'
+gem "kaminari"
 
-gem 'dotenv-rails', groups: [:development, :test]
+gem "dotenv-rails", groups: [ :development, :test ]
 
-gem 'sidekiq'
+gem "sidekiq"
 
-gem 'sidekiq-cron'
+gem "sidekiq-cron"
 
-gem 'redis'
+gem "redis"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -62,7 +62,6 @@ group :development, :test do
   gem "brakeman", require: false
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
-  gem "rubocop-rails-omakase", require: false
 end
 
 group :development do
@@ -80,4 +79,9 @@ group :test do
 end
 
 gem "tailwindcss-rails", "~> 4.1"
-gem "simplecov", "~> 0.22.0", :group => :test
+gem "simplecov", "~> 0.22.0", group: :test
+
+gem "rubocop-performance", "~> 1.24"
+
+gem "rubocop-rails", "~> 2.30"
+gem "rubocop-minitest", "~> 0.37.1"
