@@ -200,7 +200,7 @@ RSpec.describe CampaignUpdaterService do
         expect(result.to_h).to eq({
           success: false,
           action: :alert,
-          message: "Invalid `status` parameter"
+          message: "Invalid `status`"
         })
       end
     end
