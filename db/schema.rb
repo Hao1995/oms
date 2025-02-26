@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_02_25_025401) do
+ActiveRecord::Schema[8.0].define(version: 2025_02_26_034241) do
   create_table "advertisers", charset: "utf8mb3", force: :cascade do |t|
     t.integer "customer_id"
     t.integer "platform_id"
@@ -25,10 +25,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_25_025401) do
   create_table "campaigns", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "customer_id", null: false, comment: "for different customers"
     t.integer "platform_id"
-    t.string "platform_campaign_id", null: false
+    t.string "platform_campaign_id"
     t.string "title", null: false
     t.string "currency", null: false
-    t.decimal "budget_cents", precision: 65, scale: 2, null: false
+    t.integer "budget_cents", null: false
     t.string "advertiser_id", null: false
     t.column "status", "enum('open','archive')", default: "open", null: false
     t.datetime "created_at", null: false

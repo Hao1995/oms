@@ -61,6 +61,20 @@ RSpec.describe CampaignsController, type: :controller do
       end
     end
 
+    context "with archived campaign " do
+      it "updates the campaign and redirects" do
+        campaign.update!(status: "archive")
+        status_no_changes_attributes = valid_attributes.merge({status: "archive"})
+
+        put :update, params: { platform_id: platform.id, id: campaign.id, campaign: status_no_changes_attributes }
+
+        campaign.reload
+        expect(campaign.title).to eq("Updated Campaign")
+        expect(response).to redirect_to(platform_campaign_path(platform, campaign))
+        expect(flash[:notice]).to eq("Update the campaign successfully")
+      end
+    end
+
     context "with invalid attributes" do
       it "does not update and redirects with alert" do
         put :update, params: { platform_id: platform.id, id: campaign.id, campaign: invalid_attributes }
