@@ -100,13 +100,12 @@ class CampaignsController < ApplicationController
   def update
     req_dto = Campaigns::UpdateReqDto.new(campaign_params)
     service = CampaignUpdaterService.new(@platform, @campaign, @platform_api, req_dto)
-    result = service.action
+    resp_dto = service.action
 
-    case result[:status]
-    when :success
-      redirect_to platform_campaign_path(@platform, @campaign), result[:action] => result[:message]
+    if resp_dto.success
+      redirect_to platform_campaign_path(@platform, @campaign), resp_dto.action => resp_dto.message
     else
-      redirect_to edit_platform_campaign_path(@platform, @campaign), result[:action] => result[:message]
+      redirect_to edit_platform_campaign_path(@platform, @campaign), resp_dto.action => resp_dto.message
     end
   end
 

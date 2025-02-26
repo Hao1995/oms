@@ -41,7 +41,7 @@ RSpec.describe CampaignsController, type: :controller do
   end
 
   describe "PUT #update" do
-    let(:service_response) { { status: :success, action: :notice, message: "Update campaign successfully" } }
+    let(:service_response) { Campaigns::UpdateRespDto.new(true, :notice, "Update campaign successfully") }
     let(:service_double) { instance_double(CampaignUpdaterService, action: service_response) }
 
     before do
@@ -62,7 +62,7 @@ RSpec.describe CampaignsController, type: :controller do
     end
 
     context "when update fails" do
-      let(:service_response) { { status: :failed, action: :alert, message: "Failed to update campaign." } }
+      let(:service_response) { Campaigns::UpdateRespDto.new(false, :alert, "Failed to update campaign.") }
       let(:current_attributes) { invalid_attributes }
 
       it "redirects with alert" do
