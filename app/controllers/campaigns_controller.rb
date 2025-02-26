@@ -90,16 +90,14 @@ class CampaignsController < ApplicationController
       platform_campaign_id: platform_campaign_dto.id
     }))
 
-    if @campaign.save
-      redirect_to platform_campaign_path(@platform, @campaign), notice: 'Campaign was successfully created.'
-    else
-      redirect_to platform_campaigns_path(@platform), alert: 'Failed to create campaign.'
-    end
+    redirect_to platform_campaign_path(@platform, @campaign), notice: 'Campaign was successfully created.' if @campaign.save
+    redirect_to platform_campaigns_path(@platform), alert: 'Failed to create campaign.'
   end
 
   def update
-    if @campaign.status == "open"
-      platform_campaign_dto = @platform_api.campaign_api.get(@campaign.platform_campaign_id)
+    req_dto = Campaigns::UpdateReqDto.new(campaign_params)
+    service = CampaignUpdaterService.new(@platform, @campaign, @platform_api, req_dto)
+    resp_dto = service.action
 
     return redirect_to platform_campaign_path(@platform, @campaign), resp_dto.action => resp_dto.message if resp_dto.success
     return redirect_to edit_platform_campaign_path(@platform, @campaign), resp_dto.action => resp_dto.message
@@ -143,12 +141,5 @@ class CampaignsController < ApplicationController
             :advertiser_id,
             :status
           ).merge(customer_id: ENV["CUSTOMER_ID"])
-  end
-
-  def are_campaigns_same_content?(platform_campaign_dto)
-    platform_campaign_dto.title == campaign_params[:title] &&
-    platform_campaign_dto.advertiser_id == campaign_params[:advertiser_id] &&
-    platform_campaign_dto.budget_cents == campaign_params[:budget_cents] &&
-    platform_campaign_dto.currency == campaign_params[:currency]
   end
 end
