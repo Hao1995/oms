@@ -47,3 +47,32 @@ Stop applications
 ```
 make down-infra
 ```
+
+## Run Test
+Set up databases
+```
+make run-infra
+```
+
+Set up test schemas
+```
+RAILS_ENV=test rails db:create
+RAILS_ENV=test rails db:migrate
+```
+
+Run all tests
+```
+bundle exec rspec
+```
+
+Check coverage
+```
+open coverage/index.html
+```
+
+Run a single test
+```
+bundle exec rspec spec/controllers/campaigns_controller_spec.rb --example "does not update and redirects with alert"
+bundle exec rspec spec/controllers/campaigns_controller_spec.rb:56
+```
+

@@ -109,8 +109,9 @@ class CampaignsController < ApplicationController
       end
     end
 
-    if campaign_params["status"].present?
-      Rails.logger.debug "[CampaignsController] Update. status is present."
+    # status is changing
+    if @campaign.status != campaign_params["status"]
+      Rails.logger.debug "[CampaignsController] Update. status is changing."
       update_data = campaign_params
       case campaign_params["status"]
       when "open"
@@ -142,7 +143,7 @@ class CampaignsController < ApplicationController
                                   customer_id: ENV["CUSTOMER_ID"],
                                   platform_id: @platform.id,
                                   platform_advertiser_id: platform_campaign_dto.advertiser_id
-                                )
+                                ).id
 
       @campaign.update!(
         title: platform_campaign_dto.title,

@@ -36,3 +36,5 @@
 /app/assets/builds
 
 /vendor
+
+/coverage

@@ -25,7 +25,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_25_025401) do
   create_table "campaigns", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "customer_id", null: false, comment: "for different customers"
     t.integer "platform_id"
-    t.string "platform_campaign_id"
+    t.string "platform_campaign_id", null: false
     t.string "title", null: false
     t.string "currency", null: false
     t.decimal "budget_cents", precision: 65, scale: 2, null: false

@@ -74,6 +74,10 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
+
+  gem "rspec-rails", "~> 7.1"
+  gem "factory_bot_rails", "~> 6.4"
 end
 
 gem "tailwindcss-rails", "~> 4.1"
+gem "simplecov", "~> 0.22.0", :group => :test
