@@ -1,9 +1,10 @@
 class CampaignUpdaterService
-  def initialize(platform, campaign, platform_api, params)
+  def initialize(platform, campaign, platform_api, req_dto)
     @platform = platform
     @campaign = campaign
     @platform_api = platform_api
-    @params = params
+    @req_dto = req_dto
+    Rails.logger.debug "[CampaignsController] Update. req_dto: #{req_dto.to_h}"
   end
 
   def action
@@ -16,17 +17,17 @@ class CampaignUpdaterService
     end
 
     # status is changing
-    if @campaign.status != @params["status"]
+    if @campaign.status != @req_dto.status
       Rails.logger.debug "[CampaignsController] Update. status is changing."
-      update_data = @params.clone
-      case @params["status"]
+      update_data = @req_dto.to_h
+      case @req_dto.status
       when "open"
-        data = @params.permit(:title, :advertiser_id, :budget_cents, :currency)
-        data["advertiser_id"] = Advertiser.select(:platform_advertiser_id)
-                                          .find(@params[:advertiser_id])
+        data = @req_dto.to_h.slice(:title, :advertiser_id, :budget_cents, :currency)
+        data[:advertiser_id] = Advertiser.select(:platform_advertiser_id)
+                                          .find(data[:advertiser_id])
                                           .platform_advertiser_id
         platform_campaign_dto = @platform_api.campaign_api.create(data)
-        update_data["platform_campaign_id"] = platform_campaign_dto.id
+        update_data[:platform_campaign_id] = platform_campaign_dto.id
       when "archive"
         @platform_api.campaign_api.delete(@campaign.platform_campaign_id)
       else
@@ -62,20 +63,20 @@ class CampaignUpdaterService
         # case: difference campaigns - platform's campaign is old - open
         Rails.logger.debug "[CampaignsController] Update. platform data is old, updating platform"
 
-        data = @params.clone
-        data["advertiser_id"] = Advertiser.select(:platform_advertiser_id)
-                                          .find(@params[:advertiser_id])
+        data = @req_dto.to_h
+        data[:advertiser_id] = Advertiser.select(:platform_advertiser_id)
+                                          .find(data[:advertiser_id])
                                           .platform_advertiser_id
         @platform_api.campaign_api.update(@campaign.platform_campaign_id, data)
 
-        Rails.logger.debug "[CampaignsController] Update. params: #{@params}"
-        @campaign.update!(@params)
+        Rails.logger.debug "[CampaignsController] Update. params: #{@req_dto.to_h}"
+        @campaign.update!(@req_dto.to_h)
 
         return response(:success, :notice, "Update the campaign successfully")
       end
     else
       Rails.logger.debug "[CampaignsController] Update. case: campaign was archived, update to the database"
-      @campaign.update!(@params)
+      @campaign.update!(@req_dto.to_h)
       return response(:success, :notice, "Update the campaign successfully")
     end
   rescue => e
@@ -86,10 +87,10 @@ class CampaignUpdaterService
   private
 
   def are_campaigns_same_content?(platform_campaign_dto)
-    platform_campaign_dto.title == @params[:title] &&
-    platform_campaign_dto.advertiser_id == @params[:advertiser_id] &&
-    platform_campaign_dto.budget_cents == @params[:budget_cents] &&
-    platform_campaign_dto.currency == @params[:currency]
+    platform_campaign_dto.title == @req_dto.title &&
+    platform_campaign_dto.advertiser_id == @req_dto.advertiser_id &&
+    platform_campaign_dto.budget_cents == @req_dto.budget_cents &&
+    platform_campaign_dto.currency == @req_dto.currency
   end
 
   def response(status, action, message)

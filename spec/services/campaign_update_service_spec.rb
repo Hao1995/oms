@@ -7,7 +7,7 @@ RSpec.describe CampaignUpdaterService do
   let(:campaign_api) { double("CampaignApi") }
   let(:platform_api) { double("PlatformApi", campaign_api: campaign_api) }
   let(:valid_attributes) {
-    ActionController::Parameters.new({
+    Campaigns::UpdateReqDto.new({
       title: "Updated Campaign",
       advertiser_id: advertiser.id,
       budget_cents: 5000,
@@ -15,16 +15,16 @@ RSpec.describe CampaignUpdaterService do
       status: "open",
       platform_id: platform.id,
       platform_campaign_id: campaign.platform_campaign_id
-    }).permit!
+    })
   }
   let(:invalid_attributes) {
-    ActionController::Parameters.new({
+    Campaigns::UpdateReqDto.new({
       title: "",
       advertiser_id: nil,
       budget_cents: nil,
       currency: "",
       status: "open"
-    }).permit!
+    })
   }
   let(:subject) { described_class.new(platform, campaign, platform_api, valid_attributes) }
 
@@ -71,7 +71,11 @@ RSpec.describe CampaignUpdaterService do
     end
 
     context "with archived campaign " do
-      let(:status_no_changes_attributes) { valid_attributes.merge({status: "archive"}) }
+      let(:status_no_changes_attributes) {
+        copy = valid_attributes
+        copy.status = "archive"
+        copy
+      }
       let(:subject) { described_class.new(platform, campaign, platform_api, status_no_changes_attributes) }
 
       before do
@@ -155,7 +159,9 @@ RSpec.describe CampaignUpdaterService do
       it "updates to open and creates platform campaign" do
         campaign.update!(status: "archive")
 
-        subject = described_class.new(platform, campaign, platform_api, valid_attributes.merge(status: "open"))
+        copy = valid_attributes
+        copy.status = "open"
+        subject = described_class.new(platform, campaign, platform_api, copy)
         result = subject.action
 
         campaign.reload
@@ -171,7 +177,9 @@ RSpec.describe CampaignUpdaterService do
       it "updates to archive and deletes platform campaign" do
         campaign.update!(status: "open")
 
-        subject = described_class.new(platform, campaign, platform_api, valid_attributes.merge(status: "archive"))
+        copy = valid_attributes
+        copy.status = "archive"
+        subject = described_class.new(platform, campaign, platform_api, copy)
         result = subject.action
 
         campaign.reload
@@ -184,7 +192,9 @@ RSpec.describe CampaignUpdaterService do
       end
 
       it "rejects invalid status" do
-        subject = described_class.new(platform, campaign, platform_api, valid_attributes.merge(status: "invalid_status"))
+        copy = valid_attributes
+        copy.status = "invalid_status"
+        subject = described_class.new(platform, campaign, platform_api, copy)
         result = subject.action
 
         expect(result).to eq({
