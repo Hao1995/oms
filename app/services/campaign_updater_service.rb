@@ -9,8 +9,6 @@ class CampaignUpdaterService
   def action
     if @campaign.status == "open"
       platform_campaign_dto = @platform_api.campaign_api.get(@campaign.platform_campaign_id)
-
-      # case: same campaigns
       if are_campaigns_same_content?(platform_campaign_dto)
         Rails.logger.debug "[CampaignsController] Update. status: open, campaign no changes"
         return response(:success, :notice, "Campaign no changes")
