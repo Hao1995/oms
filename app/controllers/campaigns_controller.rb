@@ -105,7 +105,7 @@ class CampaignsController < ApplicationController
     when :success
       redirect_to platform_campaign_path(@platform, @campaign), result[:action] => result[:message]
     else
-      redirect_to edit_platform_campaign_path(@platform, @campaign), result[:action] =>  result[:message]
+      redirect_to edit_platform_campaign_path(@platform, @campaign), result[:action] => result[:message]
     end
   end
 
