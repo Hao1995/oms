@@ -1,7 +1,7 @@
 class CampaignsController < ApplicationController
   include Paginatable
 
-  before_action :set_platform, :set_platform_api
+  before_action :set_platform_api
   before_action :set_campaign, only: [ :show, :edit, :update, :destroy ]
   before_action :set_advertisers, only: [ :new, :edit, :index ]
 
@@ -111,12 +111,12 @@ class CampaignsController < ApplicationController
 
   private
 
-  def set_platform
-    @platform = Platform.find(params[:platform_id])
+  def platform
+    @platform ||= Platform.find(params[:platform_id])
   end
 
   def set_platform_api
-    @platform_api = PlatformApi::Factory.get_platform(@platform.name)
+    @platform_api = PlatformApi::Factory.get_platform(platform.name)
   end
 
   def set_campaign
@@ -127,7 +127,7 @@ class CampaignsController < ApplicationController
 
   def set_advertisers
     @advertisers = Advertiser.where(customer_id: ENV["CUSTOMER_ID"])
-                            .where(platform_id: @platform.id)
+                            .where(platform_id: platform.id)
                             .order(name: :asc)
   end
 
