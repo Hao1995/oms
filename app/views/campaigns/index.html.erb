@@ -76,7 +76,7 @@
   <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
     <thead class="bg-gray-100">
       <tr>
-        <% ["title", "advertiser_name", "budget_cents", "currency", "status", "created_at", "updated_at"].each do |col| %>
+        <% ["title", "currency", "budget_cents", "advertiser_name", "status", "platform_campaign_id", "created_at", "updated_at"].each do |col| %>
           <th class="py-2 px-4 text-left">
             <%= link_to col.humanize, platform_campaigns_path(@platform, params.permit!.merge(sort_by: col, sort_direction: params[:sort_direction] == "asc" ? "desc" : "asc")), class: "text-blue-500 hover:text-blue-700" %>
             <% if params[:sort_by] == col %>
@@ -91,10 +91,11 @@
       <% @campaigns.each do |campaign| %>
         <tr class="border-b hover:bg-gray-50">
           <td class="py-2 px-4 max-w-xs break-words"><%= campaign.title %></td>
-          <td class="py-2 px-4"><%= campaign.advertiser.name %></td>
-          <td class="py-2 px-4"><%= campaign.budget_cents %></td>
           <td class="py-2 px-4"><%= campaign.currency %></td>
+          <td class="py-2 px-4"><%= campaign.budget_cents %></td>
+          <td class="py-2 px-4"><%= campaign.advertiser.name %></td>
           <td class="py-2 px-4"><%= campaign.status.humanize %></td>
+          <td class="py-2 px-4"><%= campaign.platform_campaign_id %></td>
           <td class="py-2 px-4"><%= campaign.created_at.strftime("%Y-%m-%d") %></td>
           <td class="py-2 px-4"><%= campaign.updated_at.strftime("%Y-%m-%d") %></td>
           <td class="py-2 px-4 flex flex-wrap gap-2">

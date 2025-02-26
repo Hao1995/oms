@@ -128,6 +128,7 @@ class CampaignsController < ApplicationController
   def set_advertisers
     @advertisers = Advertiser.where(customer_id: ENV["CUSTOMER_ID"])
                             .where(platform_id: @platform.id)
+                            .order(name: :asc)
   end
 
   def campaign_params
