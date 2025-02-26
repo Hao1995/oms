@@ -43,10 +43,10 @@ module PlatformApi
         uri = URI("#{BASE_URL}")
         request = Net::HTTP::Post.new(uri, @headers)
         request.body = {
-          title: data["title"],
-          advertiserId: data["advertiser_id"],
-          totalBudgetCents: data["budget_cents"].to_i,
-          totalBudgetCurrency: data["currency"]
+          title: data[:title],
+          advertiserId: data[:advertiser_id],
+          totalBudgetCents: data[:budget_cents].to_i,
+          totalBudgetCurrency: data[:currency]
         }.to_json
     
         response = send_request(uri, request)
@@ -57,10 +57,10 @@ module PlatformApi
         uri = URI("#{BASE_URL}/#{campaign_id}")
         request = Net::HTTP::Put.new(uri, @headers)
         request.body = {
-          :title => data["title"],
-          :advertiserId => data["advertiser_id"],
-          :totalBudgetCents => data["budget_cents"],
-          :totalBudgetCurrency => data["currency"],
+          :title => data[:title],
+          :advertiserId => data[:advertiser_id],
+          :totalBudgetCents => data[:budget_cents],
+          :totalBudgetCurrency => data[:currency],
         }.to_json
     
         response = send_request(uri, request)

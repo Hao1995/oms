@@ -4,6 +4,7 @@ RSpec.describe CampaignsController, type: :controller do
   let(:platform) { create(:platform) }
   let(:advertiser) { create(:advertiser, platform: platform) }
   let(:campaign) { create(:campaign, platform: platform, advertiser: advertiser, status: 'open') }
+  let(:platform_api_double) { double("PlatformApi") }
   let(:valid_attributes) {
     {
       title: "Updated Campaign",
@@ -24,151 +25,51 @@ RSpec.describe CampaignsController, type: :controller do
       status: "open"
     }
   }
+  let(:current_attributes) { valid_attributes }
+  let(:req_dto) { Campaigns::UpdateReqDto.new({
+    title: current_attributes[:title],
+    advertiser_id: current_attributes[:advertiser_id],
+    budget_cents: current_attributes[:budget_cents],
+    currency: current_attributes[:currency],
+    status: current_attributes[:status],
+    platform_id: current_attributes[:platform_id],
+    platform_campaign_id: current_attributes[:platform_campaign_id]
+  }) }
 
   before do
-    allow(PlatformApi::Factory).to receive(:get_platform).and_return(double(
-      "PlatformApi",
-      campaign_api: double(
-        "CampaignApi",
-        get: campaign,
-        create: double(id: 123),
-        update: true,
-        delete: true
-      )
-    ))
+    allow(PlatformApi::Factory).to receive(:get_platform).and_return(platform_api_double)
   end
 
   describe "PUT #update" do
-    context "when campaign has no changes" do
-      before do
-        allow_any_instance_of(CampaignsController).to receive(:are_campaigns_same_content?).and_return(true)
-      end
+    let(:service_response) { Campaigns::UpdateRespDto.new(true, :notice, "Update campaign successfully") }
+    let(:service_double) { instance_double(CampaignUpdaterService, action: service_response) }
 
-      it "redirects with a notice" do
-        put :update, params: { platform_id: platform.id, id: campaign.id, campaign: valid_attributes }
-        expect(response).to redirect_to(platform_campaign_path(platform, campaign))
-        expect(flash[:notice]).to eq("Campaign no changes")
-      end
+    before do
+      allow(Campaigns::UpdateReqDto).to receive(:new).and_return(req_dto)
+      allow(CampaignUpdaterService).to receive(:new).and_return(service_double)
     end
 
-    context "with valid attributes" do
-      it "updates the campaign and redirects" do
-        put :update, params: { platform_id: platform.id, id: campaign.id, campaign: valid_attributes }
-        campaign.reload
-        expect(campaign.title).to eq("Updated Campaign")
-        expect(response).to redirect_to(platform_campaign_path(platform, campaign))
-        expect(flash[:notice]).to eq("Update the campaign successfully")
-      end
-    end
-
-    context "with archived campaign " do
-      it "updates the campaign and redirects" do
-        campaign.update!(status: "archive")
-        status_no_changes_attributes = valid_attributes.merge({status: "archive"})
-
-        put :update, params: { platform_id: platform.id, id: campaign.id, campaign: status_no_changes_attributes }
-
-        campaign.reload
-        expect(campaign.title).to eq("Updated Campaign")
-        expect(response).to redirect_to(platform_campaign_path(platform, campaign))
-        expect(flash[:notice]).to eq("Update the campaign successfully")
-      end
-    end
-
-    context "with invalid attributes" do
-      it "does not update and redirects with alert" do
-        put :update, params: { platform_id: platform.id, id: campaign.id, campaign: invalid_attributes }
-        expect(response).to redirect_to(edit_platform_campaign_path(platform, campaign))
-        expect(flash[:alert]).to eq("Failed to update campaign.")
-      end
-    end
-
-    context "when platform's campaign is newer" do
-      before do
-        platform_campaign_stub = double(
-          id: campaign.platform_campaign_id,
-          title: "New Title", 
-          budget_cents: 10000, 
-          currency: "USD",
-          advertiser_id: advertiser.platform_advertiser_id,
-          updated_at: Time.zone.now
-        )
-    
-        campaign_api_double = double("CampaignApi")
-        allow(campaign_api_double).to receive(:get).and_return(platform_campaign_stub)
-        allow(campaign_api_double).to receive(:create).and_return(double(id: "new-platform-campaign-id"))
-        allow(campaign_api_double).to receive(:update).and_return(true)
-        allow(campaign_api_double).to receive(:delete).and_return(true)
-    
-        platform_api_double = double("PlatformApi", campaign_api: campaign_api_double)
-    
-        allow(PlatformApi::Factory).to receive(:get_platform).and_return(platform_api_double)
-        allow_any_instance_of(CampaignsController).to receive(:are_campaigns_same_content?).and_return(false)
-        allow_any_instance_of(Campaign).to receive(:updated_at).and_return(1.day.ago)
-      end
-    
-      it "cancels update and redirects with an alert" do
-        put :update, params: { platform_id: platform.id, id: campaign.id, campaign: valid_attributes }
-    
-        expect(response).to redirect_to(platform_campaign_path(platform, campaign))
-        expect(flash[:alert]).to eq("Cancel the update, due to data updates on the platform")
-      end
-    end
-    
-    context "when status changes" do
-      before do
-        platform_campaign_stub = double(
-          id: campaign.platform_campaign_id,
-          title: "New Title",
-          budget_cents: 10000,
-          currency: "USD",
-          advertiser_id: advertiser.platform_advertiser_id,
-          updated_at: Time.zone.now
-        )
-
-        campaign_api_double = double("CampaignApi")
-        allow(campaign_api_double).to receive(:get).and_return(platform_campaign_stub)
-        allow(campaign_api_double).to receive(:create).and_return(double(id: "new-platform-campaign-id"))
-        allow(campaign_api_double).to receive(:delete).and_return(true)
-
-        allow(PlatformApi::Factory).to receive(:get_platform).and_return(double("PlatformApi", campaign_api: campaign_api_double))
-      end
-
-      it "updates to open and creates platform campaign" do
-        campaign.update!(status: "archive")
-
-        put :update, params: { platform_id: platform.id, id: campaign.id, campaign: valid_attributes.merge(status: "open") }
-        campaign.reload
-        expect(campaign.status).to eq("open")
-        expect(campaign.platform_campaign_id).to eq("new-platform-campaign-id")
+    context "when update is successful" do
+      it "calls the service and redirects with notice" do
+        params = { platform_id: platform.id, id: campaign.id, campaign: valid_attributes }
+        put :update, params: params, as: :json
+        
+        expect(CampaignUpdaterService).to have_received(:new).with(platform, campaign, platform_api_double, req_dto)
+        expect(service_double).to have_received(:action)
         expect(response).to redirect_to(platform_campaign_path(platform, campaign))
         expect(flash[:notice]).to eq("Update campaign successfully")
       end
-
-      it "updates to archive and deletes platform campaign" do
-        campaign.update!(status: "open")
-
-        put :update, params: { platform_id: platform.id, id: campaign.id, campaign: valid_attributes.merge(status: "archive") }
-        campaign.reload
-        expect(campaign.status).to eq("archive")
-        expect(response).to redirect_to(platform_campaign_path(platform, campaign))
-        expect(flash[:notice]).to eq("Update campaign successfully")
-      end
-
-      it "rejects invalid status" do
-        put :update, params: { platform_id: platform.id, id: campaign.id, campaign: valid_attributes.merge(status: "invalid_status") }
-        expect(response).to redirect_to(platform_campaign_path(platform, campaign))
-        expect(flash[:alert]).to eq("Invalid `status` parameter")
-      end
     end
 
-    context "when an error occurs" do
-      before do
-        allow_any_instance_of(Campaign).to receive(:update!).and_raise(StandardError, "Unexpected error")
-      end
+    context "when update fails" do
+      let(:service_response) { Campaigns::UpdateRespDto.new(false, :alert, "Failed to update campaign.") }
+      let(:current_attributes) { invalid_attributes }
 
-      it "rescues error and redirects with alert" do
-        put :update, params: { platform_id: platform.id, id: campaign.id, campaign: valid_attributes }
+      it "redirects with alert" do
+        params = { platform_id: platform.id, id: campaign.id, campaign: invalid_attributes }
+        put :update, params: params, as: :json
+
+        expect(CampaignUpdaterService).to have_received(:new).with(platform, campaign, platform_api_double, req_dto)
         expect(response).to redirect_to(edit_platform_campaign_path(platform, campaign))
         expect(flash[:alert]).to eq("Failed to update campaign.")
       end
