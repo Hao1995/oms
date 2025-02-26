@@ -98,84 +98,15 @@ class CampaignsController < ApplicationController
   end
 
   def update
-    if @campaign.status == "open"
-      platform_campaign_dto = @platform_api.campaign_api.get(@campaign.platform_campaign_id)
+    service = CampaignUpdaterService.new(@platform, @campaign, @platform_api, campaign_params)
+    result = service.action
 
-      # case: same campaigns
-      if are_campaigns_same_content?(platform_campaign_dto)
-        Rails.logger.debug "[CampaignsController] Update. status: open, campaign no changes"
-        redirect_to platform_campaign_path(@platform, @campaign), notice: "Campaign no changes"
-        return
-      end
-    end
-
-    # status is changing
-    if @campaign.status != campaign_params["status"]
-      Rails.logger.debug "[CampaignsController] Update. status is changing."
-      update_data = campaign_params
-      case campaign_params["status"]
-      when "open"
-        data = campaign_params.permit(:title, :advertiser_id, :budget_cents, :currency)
-        data["advertiser_id"] = Advertiser.select(:platform_advertiser_id)
-                                          .find(campaign_params[:advertiser_id])
-                                          .platform_advertiser_id
-        platform_campaign_dto = @platform_api.campaign_api.create(data)
-        update_data["platform_campaign_id"] = platform_campaign_dto.id
-      when "archive"
-        @platform_api.campaign_api.delete(@campaign.platform_campaign_id)
-      else
-        Rails.logger.warn "[CampaignsController] Update. invalid `status` parameter"
-        redirect_to platform_campaign_path(@platform, @campaign), alert: "Invalid `status` parameter"
-        return
-      end
-
-      @campaign.update!(update_data)
-      redirect_to platform_campaign_path(@platform, @campaign), notice: "Update campaign successfully"
-      return
-    end
-
-    if @campaign.status == "open"
-      if platform_campaign_dto.updated_at > @campaign.updated_at
-        # case: difference campaigns - platform's campaign is new - open
-        Rails.logger.debug "[CampaignsController] Update. platform data is new, syncing from platform's campaign data"
-
-        advertiser_id = Advertiser.select(:id)
-                                  .find_by(
-                                    customer_id: ENV["CUSTOMER_ID"],
-                                    platform_id: @platform.id,
-                                    platform_advertiser_id: platform_campaign_dto.advertiser_id
-                                  ).id
-
-        @campaign.update!(
-          title: platform_campaign_dto.title,
-          advertiser_id: advertiser_id,
-          budget_cents: platform_campaign_dto.budget_cents.to_s,
-          currency: platform_campaign_dto.currency
-        )
-
-        redirect_to platform_campaign_path(@platform, @campaign), alert: "Cancel the update, due to data updates on the platform"
-      else
-        # case: difference campaigns - platform's campaign is old - open
-        Rails.logger.debug "[CampaignsController] Update. platform data is old, updating platform"
-
-        data = campaign_params
-        data["advertiser_id"] = Advertiser.select(:platform_advertiser_id)
-                                          .find(campaign_params[:advertiser_id])
-                                          .platform_advertiser_id
-        @platform_api.campaign_api.update(@campaign.platform_campaign_id, data)
-
-        @campaign.update!(campaign_params)
-
-        redirect_to platform_campaign_path(@platform, @campaign), notice: "Update the campaign successfully"
-      end
+    case result[:status]
+    when :success
+      redirect_to platform_campaign_path(@platform, @campaign), result[:action] => result[:message]
     else
-      Rails.logger.debug "[CampaignsController] Update. case: campaign was archived, update to the database"
-      @campaign.update!(campaign_params)
-      redirect_to platform_campaign_path(@platform, @campaign), notice: "Update the campaign successfully"
+      redirect_to edit_platform_campaign_path(@platform, @campaign), result[:action] =>  result[:message]
     end
-  rescue => e
-    Rails.logger.error "[CampaignsController] Update. Error: #{e.message}"
-    redirect_to edit_platform_campaign_path(@platform, @campaign), alert: 'Failed to update campaign.'
   end
 
   def destroy
@@ -216,12 +147,5 @@ class CampaignsController < ApplicationController
             :advertiser_id,
             :status
           ).merge(customer_id: ENV["CUSTOMER_ID"])
-  end
-
-  def are_campaigns_same_content?(platform_campaign_dto)
-    platform_campaign_dto.title == campaign_params[:title] &&
-    platform_campaign_dto.advertiser_id == campaign_params[:advertiser_id] &&
-    platform_campaign_dto.budget_cents == campaign_params[:budget_cents] &&
-    platform_campaign_dto.currency == campaign_params[:currency]
   end
 end
