@@ -66,6 +66,9 @@
       </div>
     </div>
 
+    <%= f.hidden_field :sort_by, value: params[:sort_by] %>
+    <%= f.hidden_field :sort_direction, value: params[:sort_direction] %>
+
     <div class="mt-4 flex justify-end gap-2">
       <%= f.submit "Search", class: "bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600" %>
       <%= link_to "Clear", platform_campaigns_path(@platform), class: "bg-gray-300 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-400" %>
@@ -112,7 +115,12 @@
     <%= link_to "New", new_platform_campaign_path(@platform), class: "inline-block bg-teal-500 text-white py-2 px-4 rounded-lg hover:bg-teal-600" %>
   </div>
   <div class="mt-4 flex justify-center">
-    <%= paginate @campaigns, class: 'flex space-x-2', page_link_class: 'bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600' %>
+    <% extra_pagination_params = params.permit(:title, :advertiser_id, :budget_cents_min, :budget_cents_max, :currency, :status, :created_from, :created_to, :updated_from, :updated_to, :sort_by, :sort_direction) %>
+    <%=
+      paginate @campaigns,
+      class: 'flex space-x-2',
+      page_link_class: 'bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600',
+      extra_params: extra_pagination_params
+    %>
   </div>
-
 </div>

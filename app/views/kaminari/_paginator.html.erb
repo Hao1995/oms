@@ -3,25 +3,26 @@
   <% if current_page.first? %>
     <span class="bg-gray-300 text-white py-2 px-4 rounded-lg opacity-50 cursor-not-allowed">« First</span>
   <% else %>
-    <%= link_to '« First', url_for(page: 1), class: 'bg-sky-500 text-white py-2 px-4 rounded-lg hover:bg-sky-600' %>
+    <%= link_to '« First', url_for(extra_params.merge(page: 1)), class: 'bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600' %>
   <% end %>
 
   <%# Page Numbers %>
   <% paginator.each_page do |page| %>
     <% if page %>
       <% if page == current_page %>
-        <span class="bg-sky-700 text-white py-2 px-4 rounded-lg font-bold"><%= page %></span>
+        <span class="bg-blue-700 text-white py-2 px-4 rounded-lg font-bold"><%= page %></span>
       <% else %>
-        <%= link_to page, url_for(page: page), class: 'bg-sky-500 text-white py-2 px-4 rounded-lg hover:bg-sky-600' %>
+        <%= link_to page, url_for(extra_params.merge(page: page)), class: 'bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600' %>
       <% end %>
     <% else %>
       <span class="py-2 px-4">...</span>
     <% end %>
   <% end %>
 
+  <%# Last Page Link %>
   <% if current_page.last? %>
     <span class="bg-gray-300 text-white py-2 px-4 rounded-lg opacity-50 cursor-not-allowed">Last »</span>
   <% else %>
-    <%= link_to 'Last »', url_for(page: @campaigns.total_pages), class: 'bg-sky-500 text-white py-2 px-4 rounded-lg hover:bg-sky-600' %>
+    <%= link_to 'Last »', url_for(extra_params.merge(page: total_pages)), class: 'bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600' %>
   <% end %>
 </div>
