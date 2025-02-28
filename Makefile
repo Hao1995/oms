@@ -1,4 +1,4 @@
-.PHONY: check-lint, fix-lint, test, open-coverage, run, run-infra, down, down-infra
+.PHONY: check-lint, fix-lint, check, test, open-coverage, run, run-infra, down, down-infra
 
 check-lint:
 	bin/rubocop -f github 
@@ -8,6 +8,8 @@ fix-lint:
 
 test:
 	bundle exec rspec
+
+check: check-lint test
 
 open-coverage:
 	open coverage/index.html
