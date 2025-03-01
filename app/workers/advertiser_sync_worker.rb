@@ -1,7 +1,7 @@
 class AdvertiserSyncWorker
   include Sidekiq::Worker
 
-  def perform
+  def perform(*args)
     platforms = Rails.application.config.platforms.keys
 
     Platform.where(name: platforms).each do |platform|
@@ -12,7 +12,7 @@ class AdvertiserSyncWorker
       per_page = 100
 
       loop do
-        Rails.logger.info("[AdvertiserSyncWorker] Platform #{platform.name}, Fetch page: #{page}, per_page: #{per_page}")
+        Rails.logger.info("[AdvertiserSyncWorker][#{platform.name}], Fetch page: #{page}, per_page: #{per_page}")
         result = platform_api.advertiser_api.list(page: page, per_page: per_page)
         platform_advertisers = result[:advertisers]
 
@@ -44,6 +44,6 @@ class AdvertiserSyncWorker
                                             }
                                           end
     Advertiser.upsert_all(advertisers)
-    Rails.logger.info "[AdvertiserSyncWorker] Platform #{platform.name}, Upsert advertiser data: #{advertisers.length}"
+    Rails.logger.info "[AdvertiserSyncWorker][#{platform.name}], Upsert advertiser data: #{advertisers.length}"
   end
 end

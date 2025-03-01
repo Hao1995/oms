@@ -24,4 +24,4 @@ down:
 	docker-compose --profile app down
 
 run:
-	docker-compose --profile app up --force-recreate
+	docker-compose --profile app up -d --build --force-recreate

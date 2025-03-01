@@ -1,7 +1,7 @@
 campaign_sync:
-  cron: "*/20 * * * * *"  # Runs every 10 seconds
+  cron: "0 * * * * *" # every minute
   class: "CampaignSyncWorker"
 
 advertiser_sync:
-  cron: "* 1 * * * *"
+  cron: "0 * * * *" # every hour
   class: "AdvertiserSyncWorker"

@@ -1,7 +1,7 @@
 class CampaignSyncWorker
   include Sidekiq::Worker
 
-  def perform
+  def perform(*args)
     platforms = Rails.application.config.platforms.keys
 
     Platform.where(name: platforms).each do |platform|
@@ -12,8 +12,8 @@ class CampaignSyncWorker
       per_page = 100
 
       loop do
-        Rails.logger.info("[CampaignSyncWorker] Platform #{platform.name}, Fetch page: #{page}, per_page: #{per_page}")
-        result = platform_api.campaign_api.campaigns(page: page, per_page: per_page)
+        Rails.logger.info("[CampaignSyncWorker][#{platform.name}], Fetch page: #{page}, per_page: #{per_page}")
+        result = platform_api.campaign_api.list(page: page, per_page: per_page)
         platform_campaigns = result[:campaigns]
 
         break if platform_campaigns.empty?
@@ -56,7 +56,7 @@ class CampaignSyncWorker
                                             }
                                           end
     Campaign.insert_all!(missing_campaigns)
-    Rails.logger.info "[CampaignSyncWorker] Platform #{platform.name}, Create missing data: #{missing_campaigns.length}"
+    Rails.logger.info "[CampaignSyncWorker][#{platform.name}], Create missing data: #{missing_campaigns.length}"
 
     # update
     existing_campaigns_by_platform_campaign_id = existing_campaigns.each_with_object({}) { |campaign, hash| hash[campaign.platform_campaign_id] = campaign }
@@ -81,6 +81,6 @@ class CampaignSyncWorker
 
     # @todo update new_platform_campaigns to database
     Campaign.upsert_all(new_platform_campaigns)
-    Rails.logger.info "[CampaignSyncWorker] Platform #{platform.name}, Update outdated data: #{new_platform_campaigns.length}"
+    Rails.logger.info "[CampaignSyncWorker][#{platform.name}], Update outdated data: #{new_platform_campaigns.length}"
   end
 end
