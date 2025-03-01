@@ -38,13 +38,6 @@ services:
       redis:
         condition: service_healthy
     env_file: .env
-    environment:
-      DATABASE_HOST: mysql
-      DATABASE_USER: root
-      DATABASE_PASSWORD: password
-      REDIS_URL: redis://redis:6379/0
-    volumes:
-      - .:/app
     ports:
       - "3000:3000"
     command: "bundle exec rails s -b 0.0.0.0"
@@ -58,13 +51,6 @@ services:
       redis:
         condition: service_healthy
     env_file: .env
-    environment:
-      DATABASE_HOST: mysql
-      DATABASE_USER: root
-      DATABASE_PASSWORD: password
-      REDIS_URL: redis://redis:6379/0
-    volumes:
-      - .:/app
     command: bundle exec sidekiq
     profiles: ["app"]
 
