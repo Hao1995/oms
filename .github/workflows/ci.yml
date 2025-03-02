@@ -79,7 +79,7 @@ jobs:
           bundler-cache: true
 
       - name: Load environment variables
-        run: cp .env.example .env
+        run: cp .env.test .env
       
       - name: Prepare test database
         run: bin/rails db:test:prepare
