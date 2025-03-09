@@ -5,6 +5,8 @@ require "json"
 module PlatformApi
   module Advertiser
     class Megaphone < Base
+      include PlatformApi::Concerns::HttpClient
+
       BASE_URL = "https://cms.megaphone.fm/api/organizations/#{ENV["MEGAPHONE_ORGANIZATION_ID"]}/advertisers"
 
       def initialize(platform_name)
@@ -20,45 +22,17 @@ module PlatformApi
         request = Net::HTTP::Get.new(uri, @headers)
 
         response = send_request(uri, request)
-        advertisers = JSON.parse(response.body)
+        advertisers_data = JSON.parse(response.body)
 
-        pagination_info = {
+        pagination = PaginationDto.new(
           total: response["x-total"].to_i,
           per_page: response["x-per-page"].to_i,
           current_page: response["x-page"].to_i
-        }
+        )
 
-        { advertisers: advertisers, pagination: pagination_info }
-      end
-
-      private
-
-      def send_request(uri, request)
-        Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https") do |http|
-          Rails.logger.debug "[PlatformApi::Advertiser::Megaphone] Request. method: #{request.method}, uri: #{uri}, request: #{request.body}"
-          response = http.request(request)
-          Rails.logger.debug "[PlatformApi::Advertiser::Megaphone] Response: #{response.code} - #{response.body}"
-          response
-        end
-      end
-
-      def convert_to_response_dto(response)
-        unless response.code.to_i.in?([ 200, 201 ])
-          if response.is_a?(Net::HTTPTooManyRequests)
-            raise Http::TooManyRequestsException.new(response.code, response&.body)
-          end
-          raise Http::BaseException.new(response.code, response&.body)
-        end
-
-        data = JSON.parse(response.body)
-        AdvertiserResponseDto.new(
-          id: data["id"],
-          title: data["title"],
-          advertiser_id: data["advertiserId"],
-          budget_cents: data["totalBudgetCents"],
-          currency: data["totalBudgetCurrency"],
-          created_at: data["createdAt"],
-          updated_at: data["updatedAt"],
+        AdvertiserListResponseDto.from_response(
+          advertisers: advertisers_data,
+          pagination: pagination
         )
       end
     end

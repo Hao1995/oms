@@ -5,6 +5,7 @@ require "json"
 module PlatformApi
   module Campaign
     class Megaphone < Base
+      include PlatformApi::Concerns::HttpClient
       BASE_URL = "https://cms.megaphone.fm/api/organizations/#{ENV["MEGAPHONE_ORGANIZATION_ID"]}/campaigns"
 
       def initialize(platform_name)
@@ -28,15 +29,18 @@ module PlatformApi
         request = Net::HTTP::Get.new(uri, @headers)
 
         response = send_request(uri, request)
-        campaigns = JSON.parse(response.body)
+        campaigns_data = JSON.parse(response.body)
 
-        pagination_info = {
+        pagination = PlatformApi::PaginationDto.new(
           total: response["x-total"].to_i,
           per_page: response["x-per-page"].to_i,
           current_page: response["x-page"].to_i
-        }
+        )
 
-        { campaigns: campaigns, pagination: pagination_info }
+        CampaignListDto.from_response(
+          campaigns: campaigns_data["campaigns"],
+          pagination: pagination
+        )
       end
 
       def create(data)
@@ -78,27 +82,7 @@ module PlatformApi
 
       private
 
-      def send_request(uri, request)
-        Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https") do |http|
-          Rails.logger.debug "[MegaphoneAgent] Request. method: #{request.method}, uri: #{uri}, request: #{request.body}"
-          response = http.request(request)
-          Rails.logger.debug "[MegaphoneAgent] Response: #{response.code} - #{response.body}"
-          response
-        end
-      end
-
       def convert_to_campaign_response_dto(response)
-        unless response.code.to_i.in?([ 200, 201 ])
-          puts "harry. response_code: #{response.code}, response_body: #{response.body}"
-          if response.is_a?(Net::HTTPTooManyRequests)
-            raise Http::TooManyRequestsException.new(response.code, response&.body)
-          elsif response.is_a?(Net::HTTPNotFound)
-            raise Http::NotFoundException.new(response.code, response&.body)
-          else
-            raise Http::BaseException.new(response.code, response&.body)
-          end
-        end
-
         data = JSON.parse(response.body)
         CampaignResponseDto.new(
           id: data["id"],
