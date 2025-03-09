@@ -1,5 +1,6 @@
 class CampaignSyncWorker
   include Sidekiq::Worker
+  include CampaignComparable
 
   def perform(*args)
     options = args.first
@@ -63,11 +64,7 @@ class CampaignSyncWorker
     existing_campaigns_by_platform_campaign_id = existing_campaigns.each_with_object({}) { |campaign, hash| hash[campaign.platform_campaign_id] = campaign }
     new_platform_campaigns = platform_campaigns.select { |platform_campaign|
       campaign = existing_campaigns_by_platform_campaign_id[platform_campaign.id]
-      next true if platform_campaign.title != campaign.title
-      next true if platform_campaign.currency != campaign.currency
-      next true if platform_campaign.budget_cents != campaign.budget_cents
-      next true if platform_campaign.advertiser_id != campaign.advertiser_id
-      false
+      !campaigns_attributes_match?(platform_campaign, campaign)
     }.map { |campaign|
       {
         customer_id: ENV["CUSTOMER_ID"],

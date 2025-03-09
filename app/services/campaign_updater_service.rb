@@ -1,4 +1,6 @@
 class CampaignUpdaterService
+  include CampaignComparable
+
   def initialize(platform, campaign, platform_api, req_dto)
     @platform = platform
     @campaign = campaign
@@ -97,9 +99,6 @@ class CampaignUpdaterService
   end
 
   def are_campaigns_same_content?(platform_campaign_dto)
-    platform_campaign_dto.title == @req_dto.title &&
-    platform_campaign_dto.advertiser_id == @req_dto.advertiser_id &&
-    platform_campaign_dto.budget_cents == @req_dto.budget_cents &&
-    platform_campaign_dto.currency == @req_dto.currency
+    campaigns_attributes_match?(platform_campaign_dto, @req_dto)
   end
 end
