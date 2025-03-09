@@ -7,7 +7,8 @@ class PaginationDto
   attribute :current_page, :integer
 
   def total_pages
-    (total.to_f / per_page).ceil
+    return 0 if total.zero? || per_page.zero?
+    (total / per_page).ceil
   end
 
   def next_page
