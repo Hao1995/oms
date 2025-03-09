@@ -1,25 +1,12 @@
 class CampaignResponseDto
-  attr_accessor :id, :title, :advertiser_id, :budget_cents, :currency, :created_at, :updated_at
+  include ActiveModel::Model
+  include ActiveModel::Attributes
 
-  def initialize(id:, title:, advertiser_id:, budget_cents:, currency:, created_at:, updated_at:)
-    @id = id
-    @title = title
-    @advertiser_id = advertiser_id
-    @budget_cents = budget_cents
-    @currency = currency
-    @created_at = created_at
-    @updated_at = updated_at
-  end
-
-  def to_json
-    {
-      id: @id,
-      title: @title,
-      advertiser_id: @advertiser_id,
-      budget_cents: @budget_cents,
-      currency: @currency,
-      created_at: @created_at,
-      updated_at: @updated_at
-    }.to_json
-  end
+  attribute :id, :string
+  attribute :title, :string
+  attribute :advertiser_id, :string
+  attribute :budget_cents, :integer
+  attribute :currency, :string
+  attribute :created_at, :datetime
+  attribute :updated_at, :datetime
 end

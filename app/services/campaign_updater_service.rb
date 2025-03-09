@@ -24,12 +24,12 @@ class CampaignUpdaterService
     update_data = @req_dto.to_h
     case @req_dto.status
     when "open"
-      data = @req_dto.to_h.slice(:title, :advertiser_id, :budget_cents, :currency)
-      data[:advertiser_id] = Advertiser.select(:platform_advertiser_id)
-                                        .find(data[:advertiser_id])
+      data = @req_dto.attributes.slice("title", "advertiser_id", "budget_cents", "currency")
+      data["advertiser_id"] = Advertiser.select(:platform_advertiser_id)
+                                        .find(data["advertiser_id"])
                                         .platform_advertiser_id
       platform_campaign_dto = @platform_api.campaign_api.create(data)
-      update_data[:platform_campaign_id] = platform_campaign_dto.id
+      update_data["platform_campaign_id"] = platform_campaign_dto.id
     when "archive"
       @platform_api.campaign_api.delete(@campaign.platform_campaign_id)
     else
@@ -71,8 +71,8 @@ class CampaignUpdaterService
     Rails.logger.debug "[CampaignUpdateService] platform data is old, update the campaign to the platform"
 
     data = @req_dto.to_h
-    data[:advertiser_id] = Advertiser.select(:platform_advertiser_id)
-                                      .find(data[:advertiser_id])
+    data["advertiser_id"] = Advertiser.select(:platform_advertiser_id)
+                                      .find(data["advertiser_id"])
                                       .platform_advertiser_id
     @platform_api.campaign_api.update(@campaign.platform_campaign_id, data)
 

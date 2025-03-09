@@ -1,27 +1,18 @@
 module Campaigns
   class UpdateReqDto
-    attr_accessor :title, :advertiser_id, :budget_cents, :currency, :status, :platform_id, :platform_campaign_id
+    include ActiveModel::Model
+    include ActiveModel::Attributes
 
-    def initialize(params)
-      @platform_id = params[:platform_id]
-      @platform_campaign_id = params[:platform_campaign_id]
-      @title = params[:title]
-      @currency = params[:currency]
-      @budget_cents = params[:budget_cents]
-      @status = params[:status]
-      @advertiser_id = params[:advertiser_id]
-    end
+    attribute :title, :string
+    attribute :advertiser_id, :string
+    attribute :budget_cents, :integer
+    attribute :currency, :string
+    attribute :status, :string
+    attribute :platform_id, :integer
+    attribute :platform_campaign_id, :string
 
     def to_h
-      {
-        title: @title,
-        advertiser_id: @advertiser_id,
-        budget_cents: @budget_cents,
-        currency: @currency,
-        status: @status,
-        platform_id: @platform_id,
-        platform_campaign_id: @platform_campaign_id
-      }.compact
+      attributes.compact
     end
   end
 end
