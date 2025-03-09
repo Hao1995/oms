@@ -31,7 +31,11 @@ class CampaignUpdaterService
       platform_campaign_dto = @platform_api.campaign_api.create(data)
       update_data["platform_campaign_id"] = platform_campaign_dto.id
     when "archive"
-      @platform_api.campaign_api.delete(@campaign.platform_campaign_id)
+      begin
+        @platform_api.campaign_api.delete(@campaign.platform_campaign_id)
+      rescue Http::NotFoundException => e
+        Rails.logger.info "[CampaignUpdateService] Campaign not found on platform: #{e.message}"
+      end
     else
       Rails.logger.warn "[CampaignUpdateService] invalid `status`"
       return Campaigns::UpdateRespDto.new(false, :alert, "Invalid `status`")

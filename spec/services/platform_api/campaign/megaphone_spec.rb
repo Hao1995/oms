@@ -80,10 +80,10 @@ RSpec.describe PlatformApi::Campaign::Megaphone do
 
       response = service.list
 
-      expect(response[:campaigns]).to be_an(Array)
-      expect(response[:pagination][:total]).to eq(100)
-      expect(response[:pagination][:per_page]).to eq(10)
-      expect(response[:pagination][:current_page]).to eq(1)
+      expect(response.campaigns).to be_an(Array)
+      expect(response.pagination.total).to eq(100)
+      expect(response.pagination.per_page).to eq(10)
+      expect(response.pagination.current_page).to eq(1)
     end
   end
 
@@ -170,12 +170,12 @@ RSpec.describe PlatformApi::Campaign::Megaphone do
       expect(service.delete(campaign_id)).to be true
     end
 
-    it "returns false when deletion fails" do
+    it "raises error when campaign not found" do
       stub_request(:delete, "#{described_class::BASE_URL}/#{campaign_id}")
         .with(headers: headers)
         .to_return(status: 404)
 
-      expect(service.delete(campaign_id)).to be false
+      expect { service.delete(campaign_id) }.to raise_error(Http::NotFoundException)
     end
   end
 

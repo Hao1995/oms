@@ -31,14 +31,14 @@ module PlatformApi
         response = send_request(uri, request)
         campaigns_data = JSON.parse(response.body)
 
-        pagination = PlatformApi::PaginationDto.new(
+        pagination = PaginationDto.new(
           total: response["x-total"].to_i,
           per_page: response["x-per-page"].to_i,
           current_page: response["x-page"].to_i
         )
 
-        CampaignListDto.from_response(
-          campaigns: campaigns_data["campaigns"],
+        CampaignListResponseDto.from_response(
+          campaigns: campaigns_data,
           pagination: pagination
         )
       end
@@ -75,9 +75,8 @@ module PlatformApi
         uri = URI("#{BASE_URL}/#{campaign_id}")
         request = Net::HTTP::Delete.new(uri, @headers)
 
-        response = send_request(uri, request)
-
-        response.is_a?(Net::HTTPSuccess)
+        send_request(uri, request)
+        true
       end
 
       private

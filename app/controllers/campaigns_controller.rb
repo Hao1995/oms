@@ -107,6 +107,8 @@ class CampaignsController < ApplicationController
     @campaign.destroy
     @platform_api.campaign_api.delete(@campaign.platform_campaign_id)
     redirect_to platform_campaigns_path(@platform), notice: "Campaign was successfully destroyed."
+  rescue Http::NotFoundException
+    redirect_to platform_campaigns_path(@platform), alert: "Campaign not found."
   end
 
   private
