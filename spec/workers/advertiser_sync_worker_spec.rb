@@ -30,7 +30,7 @@ RSpec.describe AdvertiserSyncWorker, type: :worker do
   end
 
   let(:pagination) do
-    PaginationDto.new(
+    Common::PaginationDto.new(
       total: 2,
       per_page: per_page,
       current_page: page
@@ -47,7 +47,7 @@ RSpec.describe AdvertiserSyncWorker, type: :worker do
     context 'when fetching advertisers from platform' do
       before do
         allow(advertiser_api).to receive(:list).and_return(
-          AdvertiserListResponseDto.from_response(
+          ThirdParty::Advertisers::ListResponseDto.from_response(
             advertisers: advertiser_data,
             pagination: pagination
           )
@@ -81,14 +81,14 @@ RSpec.describe AdvertiserSyncWorker, type: :worker do
       end
 
       it 'handles multiple pages' do
-        first_page = AdvertiserListResponseDto.from_response(
+        first_page = ThirdParty::Advertisers::ListResponseDto.from_response(
           advertisers: [ advertiser_data.first ],
-          pagination: PaginationDto.new(total: 2, per_page: 1, current_page: 1)
+          pagination: Common::PaginationDto.new(total: 2, per_page: 1, current_page: 1)
         )
 
-        second_page = AdvertiserListResponseDto.from_response(
+        second_page = ThirdParty::Advertisers::ListResponseDto.from_response(
           advertisers: [ advertiser_data.last ],
-          pagination: PaginationDto.new(total: 2, per_page: 1, current_page: 2)
+          pagination: Common::PaginationDto.new(total: 2, per_page: 1, current_page: 2)
         )
 
         allow(advertiser_api).to receive(:list).with(hash_including(page: 1)).and_return(first_page)
@@ -105,9 +105,9 @@ RSpec.describe AdvertiserSyncWorker, type: :worker do
     context 'when API returns empty results' do
       before do
         allow(advertiser_api).to receive(:list).and_return(
-          AdvertiserListResponseDto.from_response(
+          ThirdParty::Advertisers::ListResponseDto.from_response(
             advertisers: [],
-            pagination: PaginationDto.new(total: 0, per_page: per_page, current_page: page)
+            pagination: Common::PaginationDto.new(total: 0, per_page: per_page, current_page: page)
           )
         )
       end

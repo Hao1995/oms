@@ -24,13 +24,13 @@ module PlatformApi
         response = send_request(uri, request)
         advertisers_data = JSON.parse(response.body)
 
-        pagination = PaginationDto.new(
+        pagination = Common::PaginationDto.new(
           total: response["x-total"].to_i,
           per_page: response["x-per-page"].to_i,
           current_page: response["x-page"].to_i
         )
 
-        AdvertiserListResponseDto.from_response(
+        ThirdParty::Advertisers::ListResponseDto.from_response(
           advertisers: advertisers_data,
           pagination: pagination
         )

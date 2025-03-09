@@ -43,7 +43,7 @@ RSpec.describe PlatformApi::Campaign::Megaphone do
 
       response = service.get(campaign_id)
 
-      expect(response).to be_a(CampaignResponseDto)
+      expect(response).to be_a(ThirdParty::Campaigns::ResponseDto)
       expect(response.id).to eq(campaign_id)
       expect(response.title).to eq(campaign_data[:title])
       expect(response.advertiser_id).to eq(campaign_data[:advertiser_id])
@@ -107,7 +107,7 @@ RSpec.describe PlatformApi::Campaign::Megaphone do
 
       response = service.create(campaign_data)
 
-      expect(response).to be_a(CampaignResponseDto)
+      expect(response).to be_a(ThirdParty::Campaigns::ResponseDto)
       expect(response.id).to eq(campaign_id)
       expect(response.title).to eq(campaign_data[:title])
     end
@@ -144,7 +144,7 @@ RSpec.describe PlatformApi::Campaign::Megaphone do
 
       response = service.update(campaign_id, campaign_data)
 
-      expect(response).to be_a(CampaignResponseDto)
+      expect(response).to be_a(ThirdParty::Campaigns::ResponseDto)
       expect(response.id).to eq(campaign_id)
       expect(response.title).to eq(campaign_data[:title])
     end

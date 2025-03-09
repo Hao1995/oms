@@ -28,7 +28,7 @@ RSpec.describe CampaignSyncWorker, type: :worker do
   end
 
   let(:pagination) do
-    PaginationDto.new(
+    Common::PaginationDto.new(
       total: 2,
       per_page: 100,
       current_page: 1
@@ -48,7 +48,7 @@ RSpec.describe CampaignSyncWorker, type: :worker do
     context 'when fetching campaigns from platform' do
       before do
         allow(campaign_api).to receive(:list).and_return(
-          CampaignListResponseDto.from_response(
+          ThirdParty::Campaigns::ListResponseDto.from_response(
             campaigns: campaign_data,
             pagination: pagination
           )
@@ -105,14 +105,14 @@ RSpec.describe CampaignSyncWorker, type: :worker do
       end
 
       it 'handles multiple pages' do
-        first_page = CampaignListResponseDto.from_response(
+        first_page = ThirdParty::Campaigns::ListResponseDto.from_response(
           campaigns: [ campaign_data.first ],
-          pagination: PaginationDto.new(total: 2, per_page: 1, current_page: 1)
+          pagination: Common::PaginationDto.new(total: 2, per_page: 1, current_page: 1)
         )
 
-        second_page = CampaignListResponseDto.from_response(
+        second_page = ThirdParty::Campaigns::ListResponseDto.from_response(
           campaigns: [ campaign_data.last ],
-          pagination: PaginationDto.new(total: 2, per_page: 1, current_page: 2)
+          pagination: Common::PaginationDto.new(total: 2, per_page: 1, current_page: 2)
         )
 
         allow(campaign_api).to receive(:list)
@@ -133,9 +133,9 @@ RSpec.describe CampaignSyncWorker, type: :worker do
     context 'when API returns empty results' do
       before do
         allow(campaign_api).to receive(:list).and_return(
-          CampaignListResponseDto.from_response(
+          ThirdParty::Campaigns::ListResponseDto.from_response(
             campaigns: [],
-            pagination: PaginationDto.new(total: 0, per_page: 100, current_page: 1)
+            pagination: Common::PaginationDto.new(total: 0, per_page: 100, current_page: 1)
           )
         )
       end

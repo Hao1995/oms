@@ -90,7 +90,7 @@ RSpec.describe CampaignsController, type: :controller do
       }
     }
     let(:current_attributes) { valid_attributes }
-    let(:req_dto) { Campaigns::UpdateReqDto.new({
+    let(:req_dto) { Controllers::Campaigns::UpdateReqDto.new({
       title: current_attributes[:title],
       advertiser_id: current_attributes[:advertiser_id],
       budget_cents: current_attributes[:budget_cents],
@@ -104,11 +104,11 @@ RSpec.describe CampaignsController, type: :controller do
       allow(PlatformApi::Factory).to receive(:get_platform).and_return(platform_api_double)
     end
 
-    let(:service_response) { Campaigns::UpdateRespDto.new(true, :notice, "Update campaign successfully") }
+    let(:service_response) { Controllers::Campaigns::UpdateRespDto.new(true, :notice, "Update campaign successfully") }
     let(:service_double) { instance_double(CampaignUpdaterService, action: service_response) }
 
     before do
-      allow(Campaigns::UpdateReqDto).to receive(:new).and_return(req_dto)
+      allow(Controllers::Campaigns::UpdateReqDto).to receive(:new).and_return(req_dto)
       allow(CampaignUpdaterService).to receive(:new).and_return(service_double)
     end
 
@@ -125,7 +125,7 @@ RSpec.describe CampaignsController, type: :controller do
     end
 
     context "when update fails" do
-      let(:service_response) { Campaigns::UpdateRespDto.new(false, :alert, "Failed to update campaign.") }
+      let(:service_response) { Controllers::Campaigns::UpdateRespDto.new(false, :alert, "Failed to update campaign.") }
       let(:current_attributes) { invalid_attributes }
 
       it "redirects with alert" do

@@ -21,6 +21,7 @@ module PlatformApi
         request = Net::HTTP::Get.new(uri, @headers)
 
         response = send_request(uri, request)
+
         convert_to_campaign_response_dto(response)
       end
 
@@ -31,13 +32,13 @@ module PlatformApi
         response = send_request(uri, request)
         campaigns_data = JSON.parse(response.body)
 
-        pagination = PaginationDto.new(
+        pagination = Common::PaginationDto.new(
           total: response["x-total"].to_i,
           per_page: response["x-per-page"].to_i,
           current_page: response["x-page"].to_i
         )
 
-        CampaignListResponseDto.from_response(
+        ThirdParty::Campaigns::ListResponseDto.from_response(
           campaigns: campaigns_data,
           pagination: pagination
         )
@@ -83,15 +84,7 @@ module PlatformApi
 
       def convert_to_campaign_response_dto(response)
         data = JSON.parse(response.body)
-        CampaignResponseDto.new(
-          id: data["id"],
-          title: data["title"],
-          advertiser_id: data["advertiserId"],
-          budget_cents: data["totalBudgetCents"],
-          currency: data["totalBudgetCurrency"],
-          created_at: data["createdAt"],
-          updated_at: data["updatedAt"],
-        )
+        ThirdParty::Campaigns::ResponseDto.from_response(data)
       end
     end
   end

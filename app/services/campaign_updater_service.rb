@@ -16,7 +16,7 @@ class CampaignUpdaterService
     sync_campaign_to_platform
   rescue => e
     Rails.logger.error "[CampaignUpdateService] Error: #{e.message}"
-    Campaigns::UpdateRespDto.new(false, :alert, "Failed to update campaign.")
+    Controllers::Campaigns::UpdateRespDto.new(false, :alert, "Failed to update campaign.")
   end
 
   private
@@ -40,16 +40,16 @@ class CampaignUpdaterService
       end
     else
       Rails.logger.warn "[CampaignUpdateService] invalid `status`"
-      return Campaigns::UpdateRespDto.new(false, :alert, "Invalid `status`")
+      return Controllers::Campaigns::UpdateRespDto.new(false, :alert, "Invalid `status`")
     end
 
     @campaign.update!(update_data)
-    Campaigns::UpdateRespDto.new(true, :notice, "Update campaign successfully")
+    Controllers::Campaigns::UpdateRespDto.new(true, :notice, "Update campaign successfully")
   end
 
   def handle_campaign_no_change_process
     Rails.logger.debug "[CampaignUpdateService] status: open, campaign no changes"
-    Campaigns::UpdateRespDto.new(true, :notice, "Campaign no changes")
+    Controllers::Campaigns::UpdateRespDto.new(true, :notice, "Campaign no changes")
   end
 
   def sync_campaign_from_platform
@@ -69,7 +69,7 @@ class CampaignUpdaterService
       currency: platform_campaign_dto.currency
     )
 
-    Campaigns::UpdateRespDto.new(true, :alert, "Cancel the update, due to data updates on the platform")
+    Controllers::Campaigns::UpdateRespDto.new(true, :alert, "Cancel the update, due to data updates on the platform")
   end
 
   def sync_campaign_to_platform
@@ -85,13 +85,13 @@ class CampaignUpdaterService
     Rails.logger.debug "[CampaignUpdateService] params: #{@req_dto.to_h}"
     @campaign.update!(@req_dto.to_h)
 
-    Campaigns::UpdateRespDto.new(true, :notice, "Update the campaign successfully")
+    Controllers::Campaigns::UpdateRespDto.new(true, :notice, "Update the campaign successfully")
   end
 
   def handle_archive_process
     Rails.logger.debug "[CampaignUpdateService] case: campaign was archived, update to the database"
     @campaign.update!(@req_dto.to_h)
-    Campaigns::UpdateRespDto.new(true, :notice, "Update the campaign successfully")
+    Controllers::Campaigns::UpdateRespDto.new(true, :notice, "Update the campaign successfully")
   end
 
   def platform_campaign_dto

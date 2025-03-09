@@ -7,7 +7,7 @@ RSpec.describe CampaignUpdaterService do
   let(:campaign_api) { double("CampaignApi") }
   let(:platform_api) { double("PlatformApi", campaign_api: campaign_api) }
   let(:valid_attributes) {
-    Campaigns::UpdateReqDto.new({
+    Controllers::Campaigns::UpdateReqDto.new({
       title: "Updated Campaign",
       advertiser_id: advertiser.id,
       budget_cents: 5000,
@@ -18,7 +18,7 @@ RSpec.describe CampaignUpdaterService do
     })
   }
   let(:invalid_attributes) {
-    Campaigns::UpdateReqDto.new({
+    Controllers::Campaigns::UpdateReqDto.new({
       title: "",
       advertiser_id: nil,
       budget_cents: nil,

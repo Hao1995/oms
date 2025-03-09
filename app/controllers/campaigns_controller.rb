@@ -95,7 +95,7 @@ class CampaignsController < ApplicationController
   end
 
   def update
-    req_dto = Campaigns::UpdateReqDto.new(campaign_params)
+    req_dto = Controllers::Campaigns::UpdateReqDto.new(campaign_params)
     service = CampaignUpdaterService.new(@platform, @campaign, @platform_api, req_dto)
     resp_dto = service.action
 
