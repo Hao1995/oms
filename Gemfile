@@ -76,7 +76,7 @@ group :test do
   gem "factory_bot_rails", "~> 6.4"
 end
 
-gem "tailwindcss-rails", "~> 4.1"
+gem "tailwindcss-rails", "~> 4.2"
 gem "simplecov", "~> 0.22.0", group: :test
 
 gem "rubocop-performance", "~> 1.24"
