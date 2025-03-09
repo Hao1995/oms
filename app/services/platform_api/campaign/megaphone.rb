@@ -89,10 +89,14 @@ module PlatformApi
 
       def convert_to_campaign_response_dto(response)
         unless response.code.to_i.in?([ 200, 201 ])
+          puts "harry. response_code: #{response.code}, response_body: #{response.body}"
           if response.is_a?(Net::HTTPTooManyRequests)
             raise Http::TooManyRequestsException.new(response.code, response&.body)
+          elsif response.is_a?(Net::HTTPNotFound)
+            raise Http::NotFoundException.new(response.code, response&.body)
+          else
+            raise Http::BaseException.new(response.code, response&.body)
           end
-          raise Http::BaseException.new(response.code, response&.body)
         end
 
         data = JSON.parse(response.body)

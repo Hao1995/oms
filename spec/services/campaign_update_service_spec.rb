@@ -47,9 +47,9 @@ RSpec.describe CampaignUpdaterService do
         result = subject.action
 
         expect(result.to_h).to eq({
-          success: true,
-          action: :notice,
-          message: "Campaign no changes"
+          "success" => true,
+          "action" => "notice",
+          "message" => "Campaign no changes"
         })
       end
     end
@@ -63,9 +63,9 @@ RSpec.describe CampaignUpdaterService do
         campaign.reload
         expect(campaign.title).to eq("Updated Campaign")
         expect(result.to_h).to eq({
-          success: true,
-          action: :notice,
-          message: "Update the campaign successfully"
+          "success" => true,
+          "action" => "notice",
+          "message" => "Update the campaign successfully"
         })
       end
     end
@@ -88,9 +88,9 @@ RSpec.describe CampaignUpdaterService do
         campaign.reload
         expect(campaign.title).to eq("Updated Campaign")
         expect(result.to_h).to eq({
-          success: true,
-          action: :notice,
-          message: "Update the campaign successfully"
+          "success" => true,
+          "action" => "notice",
+          "message" => "Update the campaign successfully"
         })
       end
     end
@@ -102,9 +102,9 @@ RSpec.describe CampaignUpdaterService do
         result = subject.action
 
         expect(result.to_h).to eq({
-          success: false,
-          action: :alert,
-          message: "Failed to update campaign."
+          "success" => false,
+          "action" => "alert",
+          "message" => "Failed to update campaign."
         })
       end
     end
@@ -132,9 +132,9 @@ RSpec.describe CampaignUpdaterService do
         result = subject.action
 
         expect(result.to_h).to eq({
-          success: true,
-          action: :alert,
-          message: "Cancel the update, due to data updates on the platform"
+          "success" => true,
+          "action" => "alert",
+          "message" => "Cancel the update, due to data updates on the platform"
         })
       end
     end
@@ -167,9 +167,9 @@ RSpec.describe CampaignUpdaterService do
         expect(campaign.status).to eq("open")
         expect(campaign.platform_campaign_id).to eq("new-platform-campaign-id")
         expect(result.to_h).to eq({
-          success: true,
-          action: :notice,
-          message: "Update campaign successfully"
+          "success" => true,
+          "action" => "notice",
+          "message" => "Update campaign successfully"
         })
       end
 
@@ -184,9 +184,9 @@ RSpec.describe CampaignUpdaterService do
         campaign.reload
         expect(campaign.status).to eq("archive")
         expect(result.to_h).to eq({
-          success: true,
-          action: :notice,
-          message: "Update campaign successfully"
+          "success" => true,
+          "action" => "notice",
+          "message" => "Update campaign successfully"
         })
       end
 
@@ -197,9 +197,9 @@ RSpec.describe CampaignUpdaterService do
         result = subject.action
 
         expect(result.to_h).to eq({
-          success: false,
-          action: :alert,
-          message: "Invalid `status`"
+          "success" => false,
+          "action" => "alert",
+          "message" => "Invalid `status`"
         })
       end
     end
@@ -213,9 +213,9 @@ RSpec.describe CampaignUpdaterService do
         result = subject.action
 
         expect(result.to_h).to eq({
-          success: false,
-          action: :alert,
-          message: "Failed to update campaign."
+          "success" => false,
+          "action" => "alert",
+          "message" => "Failed to update campaign."
         })
       end
     end

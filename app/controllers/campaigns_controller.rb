@@ -99,8 +99,8 @@ class CampaignsController < ApplicationController
     service = CampaignUpdaterService.new(@platform, @campaign, @platform_api, req_dto)
     resp_dto = service.action
 
-    return redirect_to platform_campaign_path(@platform, @campaign), resp_dto.action => resp_dto.message if resp_dto.success
-    redirect_to edit_platform_campaign_path(@platform, @campaign), resp_dto.action => resp_dto.message
+    return redirect_to platform_campaign_path(@platform, @campaign), resp_dto.action.to_sym => resp_dto.message if resp_dto.success
+    redirect_to edit_platform_campaign_path(@platform, @campaign), resp_dto.action.to_sym => resp_dto.message
   end
 
   def destroy

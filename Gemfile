@@ -85,3 +85,7 @@ gem "rubocop-rails", "~> 2.30"
 gem "rubocop-minitest", "~> 0.37.1"
 
 gem "rails-controller-testing", "~> 1.0"
+
+group :test do
+  gem 'webmock'
+end

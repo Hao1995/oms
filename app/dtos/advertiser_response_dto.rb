@@ -1,19 +1,9 @@
 class AdvertiserResponseDto
-  attr_accessor :id, :name
+  include ActiveModel::Model
+  include ActiveModel::Attributes
 
-  def initialize(id:, name:, created_at:, updated_at:)
-    @id = id
-    @name = name
-    @created_at = created_at
-    @updated_at = updated_at
-  end
-
-  def to_json
-    {
-      id: @id,
-      name: @name,
-      created_at: @created_at,
-      updated_at: @updated_at
-    }.to_json
-  end
+  attribute :id, :string
+  attribute :name, :string
+  attribute :created_at, :datetime
+  attribute :updated_at, :datetime
 end

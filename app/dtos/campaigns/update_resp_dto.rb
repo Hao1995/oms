@@ -1,19 +1,18 @@
 module Campaigns
   class UpdateRespDto
-    attr_reader :success, :action, :message
+    include ActiveModel::Model
+    include ActiveModel::Attributes
+
+    attribute :success, :boolean
+    attribute :action, :string
+    attribute :message, :string
 
     def initialize(success, action, message)
-      @success = success
-      @action = action
-      @message = message
+      super(success: success, action: action, message: message)
     end
 
     def to_h
-      {
-        success: @success,
-        action: @action,
-        message: @message
-      }
+      attributes.compact
     end
   end
 end
