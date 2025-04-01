@@ -81,7 +81,7 @@ gem "simplecov", "~> 0.22.0", group: :test
 
 gem "rubocop-performance", "~> 1.24"
 
-gem "rubocop-rails", "~> 2.30"
+gem "rubocop-rails", "~> 2.31"
 gem "rubocop-minitest", "~> 0.37.1"
 
 gem "rails-controller-testing", "~> 1.0"
